@@ -77,7 +77,7 @@ class App extends Component {
 
 ```
 
-For more usage, Please check it out in `./example` folder.
+For more usage, please check out `./example` folder, or clone this repo and run `npm start` to start live demo.
 
 
 ## Documents
