@@ -25,7 +25,8 @@
   },
   "dependencies": {
     "hoist-non-react-statics": "^1.2.0",
-    "react-addons-shallow-compare": "^0.14.0 || ^15.0.0"
+    "react-addons-shallow-compare": "^0.14.0 || ^15.0.0",
+    "subscribable-value": "^0.0.3"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
@@ -48,7 +49,6 @@
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
     "rimraf": "^2.5.4",
-    "subscribable-value": "^0.0.3",
     "webpack": "v2.1.0-beta.25",
     "webpack-dev-server": "2.1.0-beta.9"
   }
