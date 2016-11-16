@@ -1,11 +1,12 @@
 
-import { resolve } from 'path';
-import webpack from 'webpack';
+const { resolve } = require('path');
+const webpack = require('webpack');
 
-export default (webpackEnv) => {
+module.exports = (webpackEnv = {}) => {
+	const { prod, minify } = webpackEnv;
 	const { env } = process;
 
-	env.NODE_ENV = env.NODE_ENV || (webpackEnv ? 'production' : 'development');
+	env.NODE_ENV = env.NODE_ENV || (prod ? 'production' : 'development');
 
 	const port = env.PORT || 3000;
 	const DEV = env.NODE_ENV === 'development';
@@ -17,7 +18,7 @@ export default (webpackEnv) => {
 		cache: DEV,
 		entry: DEV ? './example' : './src',
 		output: {
-			filename: 'react-wormhole-hoc.js',
+			filename: `react-wormhole-hoc${minify ? '.min' : ''}.js`,
 			path: resolve(__dirname, DEV ? 'example' : 'dist'),
 			library: 'ReactWormholeHoc',
 			libraryTarget: 'umd',
@@ -68,6 +69,12 @@ export default (webpackEnv) => {
 
 	if (!DEV) {
 		config.externals = { react: 'React' };
+	}
+
+	if (minify) {
+		config.plugins.push(
+			new webpack.optimize.UglifyJsPlugin(),
+		);
 	}
 
 	return config;

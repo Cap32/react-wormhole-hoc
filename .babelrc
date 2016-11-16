@@ -3,9 +3,6 @@
 		"react",
 		"stage-0",
 	],
-	"plugins": [
-		["transform-es2015-modules-commonjs", { "loose": false }],
-	],
 	"env": {
 		"cjs": {
 			"presets": [
