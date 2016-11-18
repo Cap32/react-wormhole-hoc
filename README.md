@@ -18,6 +18,7 @@ See these issues for detail:
 - Works well with `shouldComponentUpdate` and `React.PureComponent`
 - No namespace conflict
 - Works well outside React Component
+- Can communicate without parent-child relationship
 - Stable. Not dependence with `react.context`
 
 
@@ -77,14 +78,14 @@ class App extends Component {
 
 ```
 
-For more usage, please check out `./example` folder, or clone this repo and run `npm start` to start live demo.
+For more usage, please check the `./example` directory, or clone this repo and run `npm start` to start live demo.
 
 
 ## API
 
-#### Wormhole
+### Wormhole
 
-##### constructor(initialValue)
+#### constructor(initialValue)
 
 Create wormhole instance.
 
@@ -96,7 +97,7 @@ Create wormhole instance.
 
 (Wormhole): `wormhole` instance.
 
-##### get()
+#### get()
 
 Get current value.
 
@@ -104,7 +105,7 @@ Get current value.
 
 (Any): Value.
 
-##### set(newValue)
+#### set(newValue)
 
 Set new value.
 
@@ -112,7 +113,7 @@ Set new value.
 
 1. newValue (Any)
 
-##### subscribe(handler)
+#### subscribe(handler)
 
 Subscribe value change event.
 
@@ -124,7 +125,7 @@ Subscribe value change event.
 
 (Function): Unsubscribe.
 
-##### hoc(injectPropOrOptions[, Component]])
+#### hoc(injectPropOrOptions[, Component]])
 
 Create React HOC.
 
@@ -133,7 +134,7 @@ Create React HOC.
 1. injectPropOrOptions (String|Object): Options object. Also can be a string short for `Options.injectProp`.
 2. Component (ReactComponent): Target React Component to HOC.
 
-Available options:
+###### Available options:
 
 - injectProp (String): The prop name of the injected value. It's required.
 - initialValue (Any): Set up initial value before the target component mount.
@@ -172,7 +173,7 @@ With [transform-decorators-legacy](https://github.com/loganfsmyth/babel-plugin-t
 
 ```js
 @myWormhole.hoc('myValue')
-export class App extends Component {
+export default class App extends Component {
 	// the same with above...
 }
 ```
@@ -191,14 +192,59 @@ const myWormhole = new Wormhole({
 		return value.content;
 	}
 })
-class App extends Component {
+export default class App extends Component {
 	// the same with above...
 }
 ```
 
-##### static compose(hocMakers[, Component])
+#### static compose(hocMakers[, Component])
 
-(TODO)
+Compose multiple wormholes to a HOC.
+
+###### Arguments
+
+1. hocMakers (Array): An array of `hocMaker`. A `hocMaker` is the return value of `wormhole.hoc(options)`. (See the example below for detail.)
+2. Component (ReactComponent): Target React Component to HOC.
+
+###### Return
+
+(Function|ReactComponent): If provide a `Component` as the second argument, it will return a new React Component. Otherwise, it will return currify function.
+
+###### Example
+
+Basic usage:
+
+```js
+import React, { Component, PropTypes } from 'react';
+import Wormhole from 'react-wormhole-hoc';
+
+const itWormhole = new Wormhole('it');
+const isWormhole = new Wormhole('is');
+const awesomeWormhole = new Wormhole({ content: 'awesome' });
+
+@Wormhole.compose([
+	itWormhole.hoc('a'),
+	isWormhole.hoc('b'),
+	awesomeWormhole.hoc({
+		injectProp: 'c',
+		select({ content }) { return content; }
+	}),
+])
+export default class App extends Component {
+	static propTypes = {
+		a: PropTypes.string,
+		b: PropTypes.string,
+		c: PropTypes.string,
+	};
+
+	render() {
+		const { a, b, c } = this.props;
+		return (
+			<h1>{a} {b} {c}</h1>
+		);
+	}
+}
+```
 
 ## Installing
 
@@ -213,6 +259,11 @@ Using yarn:
 ```
 yarn add react-wormhole-hoc
 ```
+
+## Note
+
+If you want some communications base on paren-child coupling, please use react [context](https://facebook.github.io/react/docs/context.html) instead.
+
 
 ## Related Projects
 
