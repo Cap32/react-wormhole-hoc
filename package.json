@@ -1,6 +1,6 @@
 {
   "name": "react-wormhole-hoc",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A better alternative to react context",
   "scripts": {
     "start": "cross-env BABEL_ENV=webpack webpack-dev-server",
@@ -9,7 +9,8 @@
     "build:es": "cross-env BABEL_ENV=es babel src -d es",
     "build:umd": "webpack --env.prod",
     "build:min": "webpack --env.prod --env.minify",
-    "build": "npm run build:cjs && npm run build:es && npm run build:umd && npm run build:min"
+    "build": "npm run build:cjs && npm run build:es && npm run build:umd && npm run build:min",
+    "prepublish": "npm run build"
   },
   "main": "lib/index.js",
   "module": "es/index.js",
