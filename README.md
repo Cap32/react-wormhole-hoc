@@ -19,7 +19,7 @@ See these issues for detail:
 - No namespace conflict
 - Works well outside React Component
 - Can communicate without parent-child relationship
-- Stable. Not dependence with `react.context`
+- Stable. Not dependent on `react.context`
 
 
 ## Quick Start
