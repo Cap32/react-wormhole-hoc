@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "hoist-non-react-statics": "^1.2.0",
-    "react-addons-shallow-compare": "^0.14.0 || ^15.0.0",
+    "react-addons-shallow-compare": "^15.0.0",
     "subscribable-value": "^0.0.3"
   },
   "devDependencies": {
