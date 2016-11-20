@@ -1,6 +1,6 @@
 {
   "name": "react-wormhole-hoc",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A better alternative to react context",
   "scripts": {
     "start": "cross-env BABEL_ENV=webpack webpack-dev-server",
