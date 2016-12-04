@@ -27,7 +27,7 @@
   "dependencies": {
     "hoist-non-react-statics": "^1.2.0",
     "react-addons-shallow-compare": "^15.0.0",
-    "subscribable-value": "^0.0.3"
+    "subscribable-value": "^0.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",

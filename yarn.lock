@@ -3064,9 +3064,9 @@ rc@~1.1.6:
     minimist "^1.2.0"
     strip-json-comments "~1.0.4"
 
-react-addons-shallow-compare@15.3.0:
-  version "15.3.0"
-  resolved "http://registry.npm.taobao.org/react-addons-shallow-compare/download/react-addons-shallow-compare-15.3.0.tgz#4a411935a1cf07cea98e0e1cb22732293febfa34"
+react-addons-shallow-compare@^15.0.0:
+  version "15.4.1"
+  resolved "http://registry.npm.taobao.org/react-addons-shallow-compare/download/react-addons-shallow-compare-15.4.1.tgz#b68103dd4d13144cb221065f6021de1822bd435a"
 
 react-dom:
   version "15.3.2"
@@ -3501,15 +3501,18 @@ strip-json-comments@~1.0.1, strip-json-comments@~1.0.4:
   version "1.0.4"
   resolved "http://registry.npm.taobao.org/strip-json-comments/download/strip-json-comments-1.0.4.tgz#1e15fbcac97d3ee99bf2d73b4c656b082bbafb91"
 
-subscribable-lite@^0.0.4:
-  version "0.0.4"
-  resolved "http://registry.npm.taobao.org/subscribable-lite/download/subscribable-lite-0.0.4.tgz#92cb8399cd1ca61163e2bb503890125cb298c085"
+subscribable-lite@^0.0.5:
+  version "0.0.5"
+  resolved "http://registry.npm.taobao.org/subscribable-lite/download/subscribable-lite-0.0.5.tgz#0b655c01258ef318ffcdb6cc34fea0626403f87f"
+  dependencies:
+    object-assign "^4.1.0"
 
 subscribable-value:
-  version "0.0.3"
-  resolved "http://registry.npm.taobao.org/subscribable-value/download/subscribable-value-0.0.3.tgz#be16660ea22be23f6013a7673f6c12c8bad2797c"
+  version "0.1.0"
+  resolved "http://registry.npm.taobao.org/subscribable-value/download/subscribable-value-0.1.0.tgz#2862397c19d53ff7c98c5e5d38950ca61585189f"
   dependencies:
-    subscribable-lite "^0.0.4"
+    object-assign "^4.1.0"
+    subscribable-lite "^0.0.5"
 
 supports-color@^2.0.0:
   version "2.0.0"
