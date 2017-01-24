@@ -88,7 +88,7 @@ For more usage, please check the `./example` directory, or clone this repo and r
 - [subscribe](#subscribehandler)
 - [hoc](#hocinjectproporoptions-component)
 - static [compose](#static-composehocmakers-component)
-- static [fromContext](#fromcontextcontexttypes-gethocmakers-component)
+- static [fromContext](#static-fromcontextcontexttypes-gethocmakers-component)
 
 ### Wormhole
 
