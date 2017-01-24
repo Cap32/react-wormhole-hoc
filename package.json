@@ -3,8 +3,9 @@
   "version": "0.0.3",
   "description": "A better alternative to react context",
   "scripts": {
-    "start": "cross-env BABEL_ENV=webpack webpack-dev-server",
+    "start": "npm test -- -w",
     "test": "cross-env BABEL_ENV=cjs mocha --compilers js:babel-register ./test",
+    "example": "cross-env BABEL_ENV=webpack webpack-dev-server",
     "prebuild": "rimraf dist",
     "build:cjs": "cross-env BABEL_ENV=cjs babel src -d lib",
     "build:es": "cross-env BABEL_ENV=es babel src -d es",
@@ -49,6 +50,7 @@
     "eslint-plugin-babel": "^3.2.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-react": "^5.0.1",
+    "jsdom": "^9.9.1",
     "mkdirp": "^0.5.1",
     "mocha": "^3.2.0",
     "react": "^15.3.2",
