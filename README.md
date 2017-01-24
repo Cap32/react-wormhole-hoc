@@ -19,7 +19,6 @@ See these issues for detail:
 - No namespace conflict
 - Works well outside React Component
 - Can communicate without parent-child relationship
-- Stable. Not dependent on `react.context`
 
 
 ## Quick Start
@@ -83,6 +82,14 @@ For more usage, please check the `./example` directory, or clone this repo and r
 
 ## API
 
+- [constructor](#constructor(initialValue))
+- [get](#get())
+- [set](#set(newValue))
+- [subscribe](#subscribe(handler))
+- [hoc](#hoc(injectPropOrOptions[, Component]]))
+- [static compose](#static compose(hocMakers[, Component]))
+- [static fromContext](#static compose(hocMakers[, Component]))
+
 ### Wormhole
 
 #### constructor(initialValue)
@@ -97,6 +104,8 @@ Create wormhole instance.
 
 (Wormhole): `wormhole` instance.
 
+---
+
 #### get()
 
 Get current value.
@@ -105,6 +114,8 @@ Get current value.
 
 (Any): Value.
 
+---
+
 #### set(newValue)
 
 Set new value.
@@ -112,6 +123,8 @@ Set new value.
 ###### Arguments
 
 1. newValue (Any)
+
+---
 
 #### subscribe(handler)
 
@@ -124,6 +137,8 @@ Subscribe value change event.
 ###### Return
 
 (Function): Unsubscribe.
+
+---
 
 #### hoc(injectPropOrOptions[, Component]])
 
@@ -197,6 +212,8 @@ export default class App extends Component {
 }
 ```
 
+---
+
 #### static compose(hocMakers[, Component])
 
 Compose multiple wormholes to a HOC.
@@ -245,6 +262,70 @@ export default class App extends Component {
 	}
 }
 ```
+
+---
+
+#### static fromContext(contextTypes, getHocMakers[, Component])
+
+Compose wormholes from `context`. You could define some wormhole instances to `childContextTypes` in parent component, and then get and compose some wormhole instances in child component through `fromContext`. It's useful when using server-side rendering, because the wormhole instances are no longer singletons.
+
+###### Arguments
+
+1. contextTypes (Object): Just the same with `static contextTypes` in React Component.
+2. getHocMakers (Function): Return an array of `hocMaker` through `context`. (See the example below for detail.)
+3. Component (ReactComponent): Target React Component to HOC.
+
+###### Return
+
+(Function|ReactComponent): If provide a `Component` as the second argument, it will return a new React Component. Otherwise, it will return currify function.
+
+###### Example
+
+Basic usage:
+
+```js
+import React, { Component, PropTypes } from 'react';
+import Wormhole from 'react-wormhole-hoc';
+
+@Wormhole.fromContext(
+	{ store: PropTypes.object }, // the same with `static contextType`
+	(context) => context.store.myData.hoc('a'),
+)
+class App extends Component {
+	static propTypes = {
+		a: PropTypes.string,
+	};
+
+	render() {
+		const { a } = this.props;
+		return (
+			<h1>{this.props.a}</h1>
+		);
+	}
+}
+
+class Container extends Component {
+	static childContextTypes = {
+		store: PropTypes.object,
+	};
+
+	getChildContext() {
+		return {
+			store: {
+
+				// Define a wormhole
+				myData: new Wormhole('awesome'),
+
+			},
+		};
+	}
+
+	render() {
+		return (<App />);
+	}
+}
+```
+
 
 ## Installing
 
