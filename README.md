@@ -354,4 +354,4 @@ If you want some communications base on paren-child coupling, please use react [
 
 ## License
 
-MIT @ Cap32
+MIT © Cap32
