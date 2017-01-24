@@ -82,13 +82,13 @@ For more usage, please check the `./example` directory, or clone this repo and r
 
 ## API
 
-- [constructor](#constructor(initialValue))
-- [get](#get())
-- [set](#set(newValue))
-- [subscribe](#subscribe(handler))
-- [hoc](#hoc(injectPropOrOptions[, Component]]))
-- [static compose](#static compose(hocMakers[, Component]))
-- [static fromContext](#static compose(hocMakers[, Component]))
+- [constructor](#constructorinitialvalue)
+- [get](#get)
+- [set](#setnewvalue)
+- [subscribe](#subscribehandler)
+- [hoc](#hocinjectproporoptions-component)
+- static [compose](#static-composehocmakers-component)
+- static [fromContext](#fromcontextcontexttypes-gethocmakers-component)
 
 ### Wormhole
 
