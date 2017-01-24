@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import assert from 'assert';
 import Wormhole from '../src';
 import { render, mount } from 'enzyme';
@@ -18,18 +18,18 @@ describe('react wormhole hoc', () => {
 	});
 
 	it('wormhole.hoc()', () => {
-		const val = 'hello';
-		const wormhole = new Wormhole(val);
+		const value = 'hello';
+		const wormhole = new Wormhole(value);
 		const Basic = ({ a }) => (<div>{a}</div>);
 		const WrappeedBasic = wormhole.hoc('a', Basic);
 		const wrapper = render(<WrappeedBasic />);
-		assert(wrapper.find('div').text(), val);
+		assert(wrapper.find('div').text(), value);
 	});
 
 	it('wormhole.set()', () => {
-		const val = 'hello';
+		const value = 'hello';
 		const updatedVal = 'world';
-		const wormhole = new Wormhole(val);
+		const wormhole = new Wormhole(value);
 		const Basic = ({ a }) => (<div>{a}</div>);
 		const WrappeedBasic = wormhole.hoc('a', Basic);
 		const wrapper = mount(<WrappeedBasic />);
@@ -61,6 +61,37 @@ describe('react wormhole hoc', () => {
 			Basic,
 		);
 		const wrapper = mount(<WrappeedBasic />);
+		assert(wrapper.find('div').text(), value);
+	});
+
+	it('Wormhole.fromContext()', () => {
+		const value = 'hello';
+		const Basic = ({ a }) => (<div>{a}</div>);
+		const WrappeedBasic = Wormhole.fromContext(
+			{ store: PropTypes.object },
+			(context) => context.store.a.hoc('a'),
+			Basic,
+		);
+
+		class Container extends Component {
+			static childContextTypes = {
+				store: PropTypes.object,
+			};
+
+			getChildContext() {
+				return {
+					store: {
+						a: new Wormhole(value),
+					},
+				};
+			}
+
+			render() {
+				return (<WrappeedBasic />);
+			}
+		}
+
+		const wrapper = mount(<Container />);
 		assert(wrapper.find('div').text(), value);
 	});
 });

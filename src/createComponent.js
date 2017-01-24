@@ -3,7 +3,10 @@ import React, { Component } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
 import shallowCompare from 'react-addons-shallow-compare';
 
-export default (hocMakers, WrappedComponent) => {
+export default (options, WrappedComponent) => {
+
+	const { hocMakers, getHocMakers, contextTypes } = options;
+
 	const displayName =
 		WrappedComponent.displayName || WrappedComponent.name || 'Component'
 	;
@@ -13,12 +16,16 @@ export default (hocMakers, WrappedComponent) => {
 
 		static WrappedComponent = WrappedComponent;
 
+		static contextTypes = contextTypes;
+
 		componentWillMount() {
-			const { props } = this;
+			const { props, context } = this;
 			const initialState = {};
 			this._unsubscribes = [];
 
-			hocMakers.forEach(({ wormhole, options }) => {
+			const makers = [].concat(hocMakers || getHocMakers(context));
+
+			makers.forEach(({ wormhole, options }) => {
 				const {
 					initialValue, injectProp,
 					select = (val) => val,
