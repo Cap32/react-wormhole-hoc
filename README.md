@@ -1,5 +1,7 @@
 # react-wormhole-hoc
 
+[![Build Status](https://travis-ci.org/Cap32/react-wormhole-hoc.svg?branch=master)](https://travis-ci.org/Cap32/react-wormhole-hoc)
+
 A better alternative to react [context](https://facebook.github.io/react/docs/context.html).
 
 
