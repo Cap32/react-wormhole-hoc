@@ -142,7 +142,7 @@ Subscribe value change event.
 
 ---
 
-#### hoc(injectPropOrOptions[, Component]])
+#### hoc(injectPropOrOptions[, Component])
 
 Create React HOC.
 
