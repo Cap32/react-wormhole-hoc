@@ -79,7 +79,7 @@ class App extends Component {
 
 ```
 
-For more usage, please check the `./example` directory, or clone this repo and run `npm start` to start live demo.
+For more usage, please check the `./example` directory, or clone this repo and run `npm run example` to start live demo.
 
 
 ## API
