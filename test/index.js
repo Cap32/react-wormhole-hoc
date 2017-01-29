@@ -2,7 +2,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import assert from 'assert';
-import Wormhole from '../src';
+import Wormhole, { create, Provider } from '../src';
 import { render, mount } from 'enzyme';
 import jsdom from 'jsdom';
 
@@ -20,8 +20,9 @@ describe('react wormhole hoc', () => {
 	it('wormhole.hoc()', () => {
 		const value = 'hello';
 		const wormhole = new Wormhole(value);
+		const connect = wormhole.hoc('a');
 		const Basic = ({ a }) => (<div>{a}</div>);
-		const WrappeedBasic = wormhole.hoc('a', Basic);
+		const WrappeedBasic = connect(Basic);
 		const wrapper = render(<WrappeedBasic />);
 		assert(wrapper.find('div').text(), value);
 	});
@@ -30,8 +31,9 @@ describe('react wormhole hoc', () => {
 		const value = 'hello';
 		const updatedVal = 'world';
 		const wormhole = new Wormhole(value);
+		const connect = wormhole.hoc('a');
 		const Basic = ({ a }) => (<div>{a}</div>);
-		const WrappeedBasic = wormhole.hoc('a', Basic);
+		const WrappeedBasic = connect(Basic);
 		const wrapper = mount(<WrappeedBasic />);
 		wormhole.set(updatedVal);
 		assert(wormhole.get(), updatedVal);
@@ -42,36 +44,62 @@ describe('react wormhole hoc', () => {
 		const value = 'hello';
 		const wormhole = new Wormhole({ value, bla: 'bla' });
 		const Basic = ({ a }) => (<div>{a}</div>);
-		const WrappeedBasic = wormhole.hoc({
-			injectProp: 'a',
-			select(val) {
-				return val.value;
+		const connect = wormhole.hoc('a', {
+			select(data) {
+				return data.value;
 			},
-		}, Basic);
+		});
+		const WrappeedBasic = connect(Basic);
 		const wrapper = mount(<WrappeedBasic />);
 		assert(wrapper.find('div').text(), value);
 	});
 
-	it('Wormhole.compose()', () => {
+	it('Wormhole.create() with wormhole instance', () => {
 		const value = 'This is awesome';
-		const wormholes = value.split(' ').map((val) => new Wormhole(val));
-		const Basic = ({ v0, v1, v2 }) => (<div>{v0} {v1} {v2}</div>);
-		const WrappeedBasic = Wormhole.compose(
-			wormholes.map((w, index) => w.hoc(`v${index}`)),
-			Basic,
-		);
+		const values = value.split(' ');
+		const connect = create({
+			map() {
+				return {
+					a: new Wormhole(values[0]),
+					b: new Wormhole(values[1]),
+					c: new Wormhole(values[2]),
+				};
+			},
+		});
+		const Basic = ({ a, b, c }) => (<div>{a} {b} {c}</div>);
+		const WrappeedBasic = connect(Basic);
 		const wrapper = mount(<WrappeedBasic />);
 		assert(wrapper.find('div').text(), value);
 	});
 
-	it('Wormhole.fromContext()', () => {
+	it('Wormhole.create() without wormhole instance', () => {
+		const value = 'This is awesome';
+		const values = value.split(' ');
+		const connect = create({
+			map() {
+				return {
+					a: values[0],
+					b: values[1],
+					c: values[2],
+				};
+			},
+		});
+		const Basic = ({ a, b, c }) => (<div>{a} {b} {c}</div>);
+		const WrappeedBasic = connect(Basic);
+		const wrapper = mount(<WrappeedBasic />);
+		assert(wrapper.find('div').text(), value);
+	});
+
+	it('read from `contextType`', () => {
 		const value = 'hello';
 		const Basic = ({ a }) => (<div>{a}</div>);
-		const WrappeedBasic = Wormhole.fromContext(
-			{ store: PropTypes.object },
-			(context) => context.store.a.hoc('a'),
-			Basic,
-		);
+		const connect = create({
+			map(store) {
+				return { a: store.a };
+			},
+			contextType: 'store',
+		});
+		const WrappeedBasic = connect(Basic);
 
 		class Container extends Component {
 			static childContextTypes = {
@@ -92,6 +120,26 @@ describe('react wormhole hoc', () => {
 		}
 
 		const wrapper = mount(<Container />);
+		assert(wrapper.find('div').text(), value);
+	});
+
+	it('<Provider />', () => {
+		const value = 'hello';
+		const App = ({ a }) => (<div>{a}</div>);
+		const connect = create({
+			map: ({ a }) => ({ a }),
+		});
+		const WrappeedApp = connect(App);
+
+		const wrapper = mount(
+			<Provider
+				wormholes={{
+					a: value,
+				}}
+			>
+				<WrappeedApp />
+			</Provider>
+		);
 		assert(wrapper.find('div').text(), value);
 	});
 });
