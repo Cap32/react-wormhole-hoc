@@ -6,18 +6,18 @@ import shallowCompare from 'react-addons-shallow-compare';
 import SubscribableValue from 'subscribable-value';
 
 export class Wormhole extends SubscribableValue {
-	static create = create;
+	static connect = connect;
 
 	hoc(name, options) {
-		return create({
+		return connect({
 			...options,
-			map: () => ({ [name]: this }),
+			mapProps: () => ({ [name]: this }),
 		});
 	}
 }
 
 class ContextTyper {
-	constructor(name = 'wormholes') {
+	constructor(name) {
 		this._name = name;
 	}
 
@@ -36,12 +36,13 @@ export function ensureWormholeValue(val) {
 	return val instanceof Wormhole ? val : new Wormhole(val);
 }
 
-export function create(options) {
-	return function createHoc(WrappedComponent) {
+export function connect(options) {
+	return function hoc(WrappedComponent) {
 		const {
 			select = (v) => v,
-			map = () => ({}),
-			contextType,
+			mapProps = () => ({}),
+			contextType = 'wormholes',
+			isPure = true,
 		} = options || {};
 
 		const contextTyper = new ContextTyper(contextType);
@@ -61,7 +62,7 @@ export function create(options) {
 				const { props, context } = this;
 				this._unsubscribes = [];
 
-				const wormholes = map(contextTyper.toValue(context));
+				const wormholes = mapProps(contextTyper.toValue(context));
 
 				this.state = Object
 					.keys(wormholes)
@@ -86,7 +87,7 @@ export function create(options) {
 			}
 
 			shouldComponentUpdate(...args) {
-				return shallowCompare(this, ...args);
+				return !isPure || shallowCompare(this, ...args);
 			}
 
 			render() {

@@ -1,6 +1,6 @@
 
-import { create, Wormhole } from './Implementation';
+import { connect, Wormhole } from './Implementation';
 
 export Provider from './Provider';
-export { create };
+export { connect };
 export default Wormhole;

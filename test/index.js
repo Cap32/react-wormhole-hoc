@@ -2,63 +2,113 @@
 
 import React, { Component, PropTypes } from 'react';
 import assert from 'assert';
-import Wormhole, { create, Provider } from '../src';
+import Wormhole, { connect, Provider } from '../src';
 import { render, mount } from 'enzyme';
 import jsdom from 'jsdom';
 
 describe('react wormhole hoc', () => {
-	before(() => {
-		if (typeof document === 'undefined') {
-			global.document = jsdom.jsdom(
-				'<!doctype html><html><body></body></html>'
-			);
+	beforeEach(() => {
+		if (typeof window === 'undefined') {
 			global.window = document.defaultView;
 			global.navigator = global.window.navigator;
 		}
+		global.document = jsdom.jsdom(
+			'<!doctype html><html><body></body></html>'
+		);
 	});
 
 	it('wormhole.hoc()', () => {
 		const value = 'hello';
 		const wormhole = new Wormhole(value);
-		const connect = wormhole.hoc('a');
-		const Basic = ({ a }) => (<div>{a}</div>);
-		const WrappeedBasic = connect(Basic);
-		const wrapper = render(<WrappeedBasic />);
-		assert(wrapper.find('div').text(), value);
+		const hoc = wormhole.hoc('a');
+		const App = ({ a }) => (<div>{a}</div>);
+		const WrappeedApp = hoc(App);
+		const wrapper = render(<WrappeedApp />);
+		assert.equal(wrapper.find('div').text(), value);
 	});
 
 	it('wormhole.set()', () => {
 		const value = 'hello';
 		const updatedVal = 'world';
 		const wormhole = new Wormhole(value);
-		const connect = wormhole.hoc('a');
-		const Basic = ({ a }) => (<div>{a}</div>);
-		const WrappeedBasic = connect(Basic);
-		const wrapper = mount(<WrappeedBasic />);
+		const hoc = wormhole.hoc('a');
+		const App = ({ a }) => (<div>{a}</div>);
+		const WrappeedApp = hoc(App);
+		const wrapper = mount(<WrappeedApp />);
 		wormhole.set(updatedVal);
-		assert(wormhole.get(), updatedVal);
-		assert(wrapper.find('div').text(), updatedVal);
+		assert.equal(wormhole.get(), updatedVal);
+		assert.equal(wrapper.find('div').text(), updatedVal);
 	});
 
-	it('hoc `select()` option', () => {
+	it('`isPure: true` option', () => {
+		const value = 'hello';
+		const wormhole = new Wormhole(value);
+		const hoc = wormhole.hoc('a', { isPure: true });
+		let isUpdated = false;
+
+		class App extends Component {
+			componentDidMount() {
+				wormhole.set(value);
+			}
+
+			componentDidUpdate() {
+				isUpdated = true;
+			}
+
+			render() {
+				return (<div>{this.props.a}</div>);
+			}
+		}
+
+		const WrappeedApp = hoc(App);
+		mount(<WrappeedApp />);
+		assert(!isUpdated);
+	});
+
+	it('`isPure: false` option', () => {
+		const value = 'hello';
+		const wormhole = new Wormhole(value);
+		const hoc = wormhole.hoc('a', { isPure: false });
+		let isUpdated = false;
+
+		class App extends Component {
+			componentDidMount() {
+				wormhole.set(value);
+			}
+
+			componentDidUpdate() {
+				isUpdated = true;
+			}
+
+			render() {
+				return (<div>{this.props.a}</div>);
+			}
+		}
+
+		const WrappeedApp = hoc(App);
+		mount(<WrappeedApp />);
+		assert(isUpdated);
+	});
+
+	it('`select()` option', () => {
 		const value = 'hello';
 		const wormhole = new Wormhole({ value, bla: 'bla' });
-		const Basic = ({ a }) => (<div>{a}</div>);
-		const connect = wormhole.hoc('a', {
+		const App = ({ a }) => (<div>{a}</div>);
+		const hoc = wormhole.hoc('a', {
 			select(data) {
 				return data.value;
 			},
 		});
-		const WrappeedBasic = connect(Basic);
-		const wrapper = mount(<WrappeedBasic />);
-		assert(wrapper.find('div').text(), value);
+		const WrappeedApp = hoc(App);
+		const wrapper = mount(<WrappeedApp />);
+		assert.equal(wrapper.find('div').text(), value);
 	});
 
-	it('Wormhole.create() with wormhole instance', () => {
+	it('Wormhole.connect() with wormhole instance', () => {
 		const value = 'This is awesome';
 		const values = value.split(' ');
-		const connect = create({
-			map() {
+		const hoc = connect({
+			mapProps() {
 				return {
 					a: new Wormhole(values[0]),
 					b: new Wormhole(values[1]),
@@ -66,17 +116,17 @@ describe('react wormhole hoc', () => {
 				};
 			},
 		});
-		const Basic = ({ a, b, c }) => (<div>{a} {b} {c}</div>);
-		const WrappeedBasic = connect(Basic);
-		const wrapper = mount(<WrappeedBasic />);
-		assert(wrapper.find('div').text(), value);
+		const App = ({ a, b, c }) => (<div>{a} {b} {c}</div>);
+		const WrappeedApp = hoc(App);
+		const wrapper = mount(<WrappeedApp />);
+		assert.equal(wrapper.find('div').text(), value);
 	});
 
-	it('Wormhole.create() without wormhole instance', () => {
+	it('Wormhole.connect() without wormhole instance', () => {
 		const value = 'This is awesome';
 		const values = value.split(' ');
-		const connect = create({
-			map() {
+		const hoc = connect({
+			mapProps() {
 				return {
 					a: values[0],
 					b: values[1],
@@ -84,22 +134,22 @@ describe('react wormhole hoc', () => {
 				};
 			},
 		});
-		const Basic = ({ a, b, c }) => (<div>{a} {b} {c}</div>);
-		const WrappeedBasic = connect(Basic);
-		const wrapper = mount(<WrappeedBasic />);
-		assert(wrapper.find('div').text(), value);
+		const App = ({ a, b, c }) => (<div>{a} {b} {c}</div>);
+		const WrappeedApp = hoc(App);
+		const wrapper = mount(<WrappeedApp />);
+		assert.equal(wrapper.find('div').text(), value);
 	});
 
 	it('read from `contextType`', () => {
 		const value = 'hello';
-		const Basic = ({ a }) => (<div>{a}</div>);
-		const connect = create({
-			map(store) {
+		const App = ({ a }) => (<div>{a}</div>);
+		const hoc = connect({
+			mapProps(store) {
 				return { a: store.a };
 			},
 			contextType: 'store',
 		});
-		const WrappeedBasic = connect(Basic);
+		const WrappeedApp = hoc(App);
 
 		class Container extends Component {
 			static childContextTypes = {
@@ -115,21 +165,33 @@ describe('react wormhole hoc', () => {
 			}
 
 			render() {
-				return (<WrappeedBasic />);
+				return (<WrappeedApp />);
 			}
 		}
 
 		const wrapper = mount(<Container />);
-		assert(wrapper.find('div').text(), value);
+		assert.equal(wrapper.find('div').text(), value);
 	});
 
-	it('<Provider />', () => {
+	it('<Provider />', (done) => {
 		const value = 'hello';
-		const App = ({ a }) => (<div>{a}</div>);
-		const connect = create({
-			map: ({ a }) => ({ a }),
+		const hoc = connect({
+			mapProps: ({ a }) => ({ a }),
 		});
-		const WrappeedApp = connect(App);
+
+		class App extends Component {
+			componentDidMount() {
+				// console.log('mounted');
+
+				done();
+			}
+
+			render() {
+				return (<div>{this.props.a}</div>);
+			}
+		}
+
+		const WrappeedApp = hoc(App);
 
 		const wrapper = mount(
 			<Provider
@@ -140,6 +202,6 @@ describe('react wormhole hoc', () => {
 				<WrappeedApp />
 			</Provider>
 		);
-		assert(wrapper.find('div').text(), value);
+		assert.equal(wrapper.find('div').text(), value);
 	});
 });
