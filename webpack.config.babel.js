@@ -14,7 +14,7 @@ module.exports = (webpackEnv = {}) => {
 	const exampleDir = resolve(__dirname, 'example');
 
 	const config = {
-		devtool: DEV ? 'eval-source-map' : 'none',
+		devtool: DEV ? 'source-map' : 'none',
 		cache: DEV,
 		entry: DEV ? './example' : './src',
 		output: {
@@ -55,6 +55,8 @@ module.exports = (webpackEnv = {}) => {
 		},
 		devServer: {
 			port,
+			hot: true,
+			inline: false,
 			publicPath: '/',
 			contentBase: './example',
 			historyApiFallback: {

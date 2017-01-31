@@ -2,7 +2,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import { render } from 'react-dom';
-import Wormhole from '../src';
+import Wormhole, { connect } from '../src';
 import { Box, Link, getLocation, fetch } from './utils';
 
 const locationWormhole = new Wormhole(getLocation());
@@ -17,16 +17,16 @@ const fetchData = () => {
 	}
 };
 
-@Wormhole.compose([
-	locationWormhole.hoc('location'),
-	pageStoreWormhole.hoc({
-		injectProp: 'page',
-		select: (store, props) => {
-			const id = /\/(\d+)$/.exec(props.location)[1];
-			return store.list.find((page) => page.id === +id);
-		},
-	}),
-])
+@connect({
+	mapProps(wormholes, compute) {
+		return {
+			page: compute(() => {
+				const id = /\/(\d+)$/.exec(locationWormhole.get())[1];
+				return pageStoreWormhole.get().list.find((page) => page.id === +id);
+			}, [pageStoreWormhole, locationWormhole]),
+		};
+	},
+})
 class Page extends Component {
 	static propTypes = {
 		page: PropTypes.object,
