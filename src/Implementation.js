@@ -3,10 +3,37 @@
 import React, { Component, PropTypes } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
 import shallowCompare from 'react-addons-shallow-compare';
-import SubscribableValue from 'subscribable-value';
+import Emitter from 'emit-lite';
 
-export class Wormhole extends SubscribableValue {
+// TODO: should shim `Object.is()`
+
+export class Wormhole extends Emitter {
 	static connect = connect;
+
+	constructor(initialValue) {
+		super();
+
+		this._val = initialValue;
+	}
+
+	get() {
+		this.emit('get');
+		return this._val;
+	}
+
+	set(value) {
+		const prevValue = this._val;
+		this._val = value;
+		this.emit('set', value, prevValue);
+		if (!Object.is(prevValue, value)) {
+			this.emit('change', value, prevValue);
+		}
+	}
+
+	on(type, fn) {
+		super.on(type, fn);
+		return () => super.off(type, fn);
+	}
 
 	hoc(name, options) {
 		return connect({
@@ -33,7 +60,9 @@ class ContextTyper {
 }
 
 export function ensureWormholeValue(val) {
-	return val instanceof Wormhole ? val : new Wormhole(val);
+	// const isValid = typeof val === 'function' || val instanceof Wormhole;
+	const isValid = val instanceof Wormhole;
+	return isValid ? val : new Wormhole(val);
 }
 
 export function connect(options) {
@@ -62,18 +91,39 @@ export function connect(options) {
 				const { props, context } = this;
 				this._unsubscribes = [];
 
-				const wormholes = mapProps(contextTyper.toValue(context));
+				const wormholes = contextTyper.toValue(context);
+
+				const compute = (getComputed, deps = []) => {
+					let computed;
+					const unsubs = [];
+					const subscribe = (wormhole) => {
+						unsubs.push(wormhole.on('get', () => {
+							this._unsubscribes.push(wormhole.on('change', () => {
+								computed.set(getComputed());
+							}));
+						}));
+					};
+
+					if (deps.length) { deps.forEach(subscribe); }
+
+					const computedValue = getComputed();
+					unsubs.forEach((unsub) => unsub());
+					return computed = new Wormhole(computedValue);
+				};
+
+
+				const wormholeProps = mapProps(wormholes, compute);
 
 				this.state = Object
-					.keys(wormholes)
+					.keys(wormholeProps)
 					.reduce((state, key) => {
-						const wormhole = ensureWormholeValue(wormholes[key]);
+						const wormhole = ensureWormholeValue(wormholeProps[key]);
 						const value = select.call(wormhole, wormhole.get(), props);
 						state[key] = value;
 
-						this._unsubscribes.push(wormhole.subscribe((nextValue) => {
+						this._unsubscribes.push(wormhole.on('change', (nextValue) => {
 							this.setState({
-								[key]: select(nextValue, this.props),
+								[key]: select.call(wormhole, nextValue, this.props),
 							});
 						}));
 

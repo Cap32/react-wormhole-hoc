@@ -8,13 +8,13 @@ import jsdom from 'jsdom';
 
 describe('react wormhole hoc', () => {
 	beforeEach(() => {
-		if (typeof window === 'undefined') {
-			global.window = document.defaultView;
-			global.navigator = global.window.navigator;
-		}
 		global.document = jsdom.jsdom(
 			'<!doctype html><html><body></body></html>'
 		);
+		if (typeof window === 'undefined') {
+			global.window = global.document.defaultView;
+			global.navigator = global.window.navigator;
+		}
 	});
 
 	it('wormhole.hoc()', () => {
@@ -66,14 +66,14 @@ describe('react wormhole hoc', () => {
 	});
 
 	it('`isPure: false` option', () => {
-		const value = 'hello';
+		const value = { text: 'hello' };
 		const wormhole = new Wormhole(value);
 		const hoc = wormhole.hoc('a', { isPure: false });
 		let isUpdated = false;
 
 		class App extends Component {
 			componentDidMount() {
-				wormhole.set(value);
+				wormhole.set(Object.assign({}, value));
 			}
 
 			componentDidUpdate() {
@@ -81,7 +81,7 @@ describe('react wormhole hoc', () => {
 			}
 
 			render() {
-				return (<div>{this.props.a}</div>);
+				return (<div>{this.props.a.text}</div>);
 			}
 		}
 
@@ -173,21 +173,39 @@ describe('react wormhole hoc', () => {
 		assert.equal(wrapper.find('div').text(), value);
 	});
 
-	it('<Provider />', (done) => {
-		const value = 'hello';
+	it('<Provider /> advanced', () => {
 		const hoc = connect({
-			mapProps: ({ a }) => ({ a }),
+			mapProps(wormholes, compute) {
+				return {
+					count: wormholes.count,
+					doubleCount: compute(
+						() => wormholes.count.get() * 2,
+						[wormholes.count],
+					),
+					increase() {
+						const { count } = wormholes;
+						count.set(count.get() + 1);
+					},
+				};
+			},
 		});
 
 		class App extends Component {
-			componentDidMount() {
-				// console.log('mounted');
-
-				done();
-			}
+			static propTypes = {
+				count: PropTypes.number,
+				doubleCount: PropTypes.number,
+				increase: PropTypes.func,
+			};
 
 			render() {
-				return (<div>{this.props.a}</div>);
+				const { count, doubleCount, increase } = this.props;
+				return (
+					<div>
+						<button onClick={increase}>increase</button>
+						<p id="count">{count}</p>
+						<p id="doubleCount">{doubleCount}</p>
+					</div>
+				);
 			}
 		}
 
@@ -196,12 +214,16 @@ describe('react wormhole hoc', () => {
 		const wrapper = mount(
 			<Provider
 				wormholes={{
-					a: value,
+					count: 1,
 				}}
 			>
 				<WrappeedApp />
 			</Provider>
 		);
-		assert.equal(wrapper.find('div').text(), value);
+		assert.equal(wrapper.find('#count').text(), 1);
+		assert.equal(wrapper.find('#doubleCount').text(), 2);
+		wrapper.find('button').simulate('click');
+		assert.equal(wrapper.find('#count').text(), 2);
+		assert.equal(wrapper.find('#doubleCount').text(), 4);
 	});
 });

@@ -27,9 +27,9 @@
     "react": "^0.14.0 || ^15.0.0"
   },
   "dependencies": {
+    "emit-lite": "^1.0.0",
     "hoist-non-react-statics": "^1.2.0",
-    "react-addons-shallow-compare": "^15.0.0",
-    "subscribable-value": "^0.1.0"
+    "react-addons-shallow-compare": "^15.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",

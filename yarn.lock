@@ -1638,6 +1638,10 @@ elliptic@^6.0.0:
     hash.js "^1.0.0"
     inherits "^2.0.1"
 
+emit-lite@^1.0.0:
+  version "1.0.0"
+  resolved "http://registry.npm.taobao.org/emit-lite/download/emit-lite-1.0.0.tgz#b96bc204bbc2180f041424fdc92cf3b27501370b"
+
 emojis-list@^2.0.0:
   version "2.1.0"
   resolved "http://registry.npm.taobao.org/emojis-list/download/emojis-list-2.1.0.tgz#4daa4d9db00f9819880c79fa457ae5b09a1fd389"
@@ -3066,11 +3070,7 @@ miller-rabin@^4.0.0:
     bn.js "^4.0.0"
     brorand "^1.0.1"
 
-"mime-db@>= 1.24.0 < 2":
-  version "1.25.0"
-  resolved "http://registry.npm.taobao.org/mime-db/download/mime-db-1.25.0.tgz#c18dbd7c73a5dbf6f44a024dc0d165a1e7b1c392"
-
-mime-db@~1.24.0:
+"mime-db@>= 1.24.0 < 2", mime-db@~1.24.0:
   version "1.24.0"
   resolved "http://registry.npm.taobao.org/mime-db/download/mime-db-1.24.0.tgz#e2d13f939f0016c6e4e9ad25a8652f126c467f0c"
 
@@ -4024,19 +4024,6 @@ strip-bom@^2.0.0:
 strip-json-comments@~1.0.1, strip-json-comments@~1.0.4:
   version "1.0.4"
   resolved "http://registry.npm.taobao.org/strip-json-comments/download/strip-json-comments-1.0.4.tgz#1e15fbcac97d3ee99bf2d73b4c656b082bbafb91"
-
-subscribable-lite@^0.0.5:
-  version "0.0.5"
-  resolved "http://registry.npm.taobao.org/subscribable-lite/download/subscribable-lite-0.0.5.tgz#0b655c01258ef318ffcdb6cc34fea0626403f87f"
-  dependencies:
-    object-assign "^4.1.0"
-
-subscribable-value:
-  version "0.1.0"
-  resolved "http://registry.npm.taobao.org/subscribable-value/download/subscribable-value-0.1.0.tgz#2862397c19d53ff7c98c5e5d38950ca61585189f"
-  dependencies:
-    object-assign "^4.1.0"
-    subscribable-lite "^0.0.5"
 
 supports-color@3.1.2, supports-color@^3.1.0, supports-color@^3.1.1:
   version "3.1.2"
