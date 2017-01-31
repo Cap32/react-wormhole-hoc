@@ -6,7 +6,7 @@
     "start": "npm test -- -w",
     "test": "cross-env BABEL_ENV=cjs mocha --compilers js:babel-register ./test",
     "example": "cross-env BABEL_ENV=webpack webpack-dev-server",
-    "prebuild": "rimraf dist",
+    "prebuild": "rimraf dist lib es",
     "build:cjs": "cross-env BABEL_ENV=cjs babel src -d lib",
     "build:es": "cross-env BABEL_ENV=es babel src -d es",
     "build:umd": "webpack --env.prod",
@@ -29,7 +29,7 @@
   "dependencies": {
     "core-js": "^2.4.1",
     "dot-prop": "^4.1.0",
-    "emit-lite": "^1.0.0",
+    "emit-lite": "^2.0.0",
     "hoist-non-react-statics": "^1.2.0",
     "react-addons-shallow-compare": "^15.0.0"
   },

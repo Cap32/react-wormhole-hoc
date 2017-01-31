@@ -6,6 +6,7 @@ import shallowCompare from 'react-addons-shallow-compare';
 import dotProp from 'dot-prop';
 import Emitter from 'emit-lite';
 import is from 'core-js/library/fn/object/is';
+import assign from 'core-js/library/fn/object/assign';
 
 const isFunction = (t) => typeof t === 'function';
 const isNotFunction = (t) => !isFunction(t);
@@ -31,7 +32,6 @@ export class Wormhole extends Emitter {
 
 	constructor(initialValue) {
 		super();
-
 		this._val = ensureValue(initialValue);
 	}
 
@@ -47,11 +47,6 @@ export class Wormhole extends Emitter {
 		if (!is(prevValue, value)) {
 			this.emit('change', value, prevValue);
 		}
-	}
-
-	on(type, fn) {
-		super.on(type, fn);
-		return () => super.off(type, fn);
 	}
 
 	hoc(name, options) {
@@ -110,6 +105,7 @@ export function connect(options) {
 
 			componentWillMount() {
 				const { context } = this;
+				const vm = {};
 				const state = {};
 				this._unsubscribes = [];
 
@@ -126,8 +122,13 @@ export function connect(options) {
 					getInitial(wormholesFromCtx, this) : wormholesFromCtx
 				;
 
-				const methods = ensureObject(mapMethods.call(wormholes, wormholes));
-				const props = ensureObject(mapProps.call(wormholes, wormholes));
+				assign(vm, wormholes);
+
+				const methods = ensureObject(mapMethods.call(vm, vm));
+
+				assign(vm, methods);
+
+				const props = ensureObject(mapProps.call(vm, vm));
 
 				map(props, (wormhole, prop) => {
 					setUpState(prop, ensureWormholeValue(wormhole));
@@ -138,7 +139,7 @@ export function connect(options) {
 				map(computed, (getComputed, prop) => {
 					var wormhole;
 					const getComputedValue = ensureFunction(getComputed);
-					const get = () => getComputedValue.call(wormholes, wormholes);
+					const get = () => getComputedValue.call(vm, vm);
 					const deps = map(wormholes, (wormhole) => wormhole);
 					const unsubs = [];
 					const watchDep = (depWormhole) => {
