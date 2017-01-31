@@ -92,10 +92,19 @@ describe('react wormhole hoc', () => {
 
 	it('hoc with `mapProps()` options', () => {
 		const value = 'hello';
-		const wormhole = new Wormhole({ value, bla: 'bla' });
+		const wormhole = new Wormhole({
+			it: {
+				is: {
+					awesome: value,
+				},
+			},
+			bla: 'bla',
+		});
 		const App = ({ a }) => (<div>{a}</div>);
 		const hoc = wormhole.hoc('a', {
-			mapProps: ({ a }) => ({ a: a.get().value }),
+			mapProps: ({ a }) => ({
+				a: () => a.get('it.is.awesome'),
+			}),
 		});
 		const WrappeedApp = hoc(App);
 		const wrapper = mount(<WrappeedApp />);
@@ -236,10 +245,76 @@ describe('react wormhole hoc', () => {
 				<WrappeedApp />
 			</Provider>
 		);
+
 		assert.equal(wrapper.find('#count').text(), 1);
 		assert.equal(wrapper.find('#doubleCount').text(), 2);
 		wrapper.find('button').simulate('click');
 		assert.equal(wrapper.find('#count').text(), 2);
 		assert.equal(wrapper.find('#doubleCount').text(), 4);
 	});
+
+	// it('advanced `computed` props', () => {
+	// 	const hoc = connect({
+	// 		mapProps(wormholes) {
+	// 			const { count1, count2 } = wormholes;
+	// 			return {
+	// 				count2,
+	// 				count2,
+	// 				doubleCount: () => count.get('it.is.awesome') * 2,
+	// 			};
+	// 		},
+	// 		mapMethods(wormholes) {
+	// 			const { count } = wormholes;
+	// 			return {
+	// 				increase() {
+	// 					count.set(count.get() + 1);
+	// 				},
+	// 			};
+	// 		},
+	// 	});
+
+	// 	class App extends Component {
+	// 		static propTypes = {
+	// 			count: PropTypes.number,
+	// 			doubleCount: PropTypes.number,
+	// 			increase: PropTypes.func,
+	// 		};
+
+	// 		render() {
+	// 			const { count, doubleCount, increase } = this.props;
+	// 			return (
+	// 				<div>
+	// 					<button onClick={increase}>increase</button>
+	// 					<p id="count">{count}</p>
+	// 					<p id="doubleCount">{doubleCount}</p>
+	// 				</div>
+	// 			);
+	// 		}
+	// 	}
+
+	// 	const WrappeedApp = hoc(App);
+
+	// 	const wrapper = mount(
+	// 		<Provider
+	// 			wormholes={{
+	// 				count1: new Wormhole({
+	// 					it: {
+	// 						is: {
+	// 							awesome: 0,
+	// 						},
+	// 					},
+	// 				}),
+	// 				count2: new Wormhole(0),
+	// 			}}
+	// 		>
+	// 			<WrappeedApp />
+	// 		</Provider>
+	// 	);
+
+	// 	assert.equal(wrapper.find('#count').text(), 1);
+	// 	assert.equal(wrapper.find('#doubleCount').text(), 2);
+	// 	wrapper.find('button').simulate('click');
+	// 	assert.equal(wrapper.find('#count').text(), 2);
+	// 	assert.equal(wrapper.find('#doubleCount').text(), 4);
+	// });
 });

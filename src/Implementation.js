@@ -3,6 +3,7 @@
 import React, { Component, PropTypes } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
 import shallowCompare from 'react-addons-shallow-compare';
+import dotProp from 'dot-prop';
 import Emitter from 'emit-lite';
 
 // TODO: should shim `Object.is()`
@@ -32,9 +33,9 @@ export class Wormhole extends Emitter {
 		this._val = ensureValue(initialValue);
 	}
 
-	get() {
-		this.emit('get');
-		return this._val;
+	get(path) {
+		this.emit('get', path);
+		return dotProp.get(this._val, path);
 	}
 
 	set(value) {
@@ -85,7 +86,6 @@ export function connect(options) {
 	return function hoc(WrappedComponent) {
 		const {
 			getInitial,
-			select = (v) => v,
 			mapProps = () => ({}),
 			mapMethods = () => ({}),
 			contextType = 'wormholes',
@@ -119,9 +119,13 @@ export function connect(options) {
 					const deps = map(wormholes, (key) => wormholes[key]);
 					const unsubs = [];
 					const subscribe = (wormhole) => {
-						unsubs.push(wormhole.on('get', () => {
-							this._unsubscribes.push(wormhole.on('change', () => {
-								computed.set(getComputedValue());
+						unsubs.push(wormhole.on('get', (path) => {
+							this._unsubscribes.push(wormhole.on('change', (val, prev) => {
+								const value = dotProp.get(val, path);
+								const prevValue = dotProp.get(prev, path);
+								if (!Object.is(value, prevValue)) {
+									computed.set(getComputedValue());
+								}
 							}));
 						}));
 					};
@@ -143,12 +147,11 @@ export function connect(options) {
 				})
 				.reduce((state, key) => {
 					const wormhole = ensureWormholeValue(wormholeProps[key]);
-					const value = select.call(wormhole, wormhole.get(), props);
-					state[key] = value;
+					state[key] = wormhole.get();
 
 					this._unsubscribes.push(wormhole.on('change', (nextValue) => {
 						this.setState({
-							[key]: select.call(wormhole, nextValue, this.props),
+							[key]: nextValue,
 						});
 					}));
 
