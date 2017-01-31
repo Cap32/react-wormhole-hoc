@@ -2,69 +2,79 @@
 
 import React, { Component, PropTypes } from 'react';
 import { render } from 'react-dom';
-import Wormhole, { connect } from '../src';
+import Wormhole, { connect, Provider } from '../src';
 import { Box, Link, getLocation, fetch } from './utils';
 
-const locationWormhole = new Wormhole(getLocation());
-const pageStoreWormhole = new Wormhole({ list: [] });
-const counterWormhole = new Wormhole(0);
-
-const fetchData = () => {
-	if (!pageStoreWormhole.get().list.length) {
+const makeFetchData = (page) => () => {
+	if (!page.get().list.length) {
 		fetch('/fake/api').then((data) => {
-			pageStoreWormhole.set(data);
+			page.set(data);
 		});
 	}
 };
 
 @connect({
-	mapProps(wormholes, compute) {
+	mapProps({ page, location }) {
 		return {
-			page: compute(() => {
-				const id = /\/(\d+)$/.exec(locationWormhole.get())[1];
-				return pageStoreWormhole.get().list.find((page) => page.id === +id);
-			}, [pageStoreWormhole, locationWormhole]),
+			data: () => {
+				const id = /\/(\d+)$/.exec(location.get())[1];
+				return page.get().list.find((page) => page.id === +id);
+			},
+		};
+	},
+	mapMethods({ page }) {
+		return {
+			fetchData: makeFetchData(page),
 		};
 	},
 })
 class Page extends Component {
 	static propTypes = {
-		page: PropTypes.object,
+		data: PropTypes.object,
+		fetchData: PropTypes.func,
 	};
 
 	componentDidMount() {
-		fetchData();
+		this.props.fetchData();
 	}
 
 	render() {
-		const { page } = this.props;
+		const { data } = this.props;
 		return (
-			<Box title={page ? page.name : '-'}>
-				{!page && 'loading...'}
-				{!!page && page.content}
+			<Box title={data ? data.name : '-'}>
+				{!data && 'loading...'}
+				{!!data && data.content}
 				<div><Link href="/pages">Back</Link></div>
 			</Box>
 		);
 	}
 }
 
-@pageStoreWormhole.hoc('store')
+@connect({
+	mapProps: ({ page }) => ({ page }),
+	mapMethods({ page }) {
+		return {
+			fetchData: makeFetchData(page),
+		};
+	},
+})
 class Pages extends Component {
 	static propTypes = {
-		store: PropTypes.object,
+		page: PropTypes.object,
+		fetchData: PropTypes.func,
 	};
 
 	componentDidMount() {
-		fetchData();
+		this.props.fetchData();
 	}
 
 	render() {
-		const { store } = this.props;
+		const { page } = this.props;
 		return (
 			<Box title="Pages">
-				{!store.list.length && 'loading...'}
+				{!page.list.length && 'loading...'}
 				<navi>
-					{store.list.map(({ name, id }) =>
+					{page.list.map(({ name, id }) =>
 						<Link href={`/pages/${id}`} key={id}>{name}</Link>
 					)}
 				</navi>
@@ -73,28 +83,34 @@ class Pages extends Component {
 	}
 }
 
-@counterWormhole.hoc('counter')
+@connect({
+	mapProps: ({ counter }) => ({ counter }),
+	mapMethods: ({ counter }) => ({
+		increase(ev) {
+			ev.preventDefault();
+			counter.set(counter.get() + 1);
+		},
+	})
+})
 class CounterControl extends Component {
 	static propTypes = {
 		counter: PropTypes.number,
-	};
-
-	_handleIncrease = (ev) => {
-		ev.preventDefault();
-		counterWormhole.set(counterWormhole.get() + 1);
+		increase: PropTypes.func,
 	};
 
 	render() {
+		const { counter, increase } = this.props;
 		return (
 			<Box title="Control">
-				<button onClick={this._handleIncrease}>increase value</button>
-				<div>current value: {this.props.counter}</div>
+				<button onClick={increase}>increase value</button>
+				<div>current value: {counter}</div>
 			</Box>
 		);
 	}
 }
-
-@counterWormhole.hoc('counter')
+@connect({
+	mapProps: ({ counter }) => ({ counter }),
+})
 class CounterDisplay extends Component {
 	static propTypes = {
 		counter: PropTypes.number,
@@ -115,8 +131,9 @@ const Counter = () =>
 		<CounterDisplay />
 	</Box>
 ;
-
-@locationWormhole.hoc('location')
+@connect({
+	mapProps: ({ location }) => ({ location }),
+})
 class Router extends Component {
 	static propTypes = {
 		location: PropTypes.string,
@@ -140,7 +157,13 @@ class Router extends Component {
 
 class Root extends Component {
 	_handleRouteChange = () => {
-		locationWormhole.set(getLocation());
+		this.wormholes.location.set(getLocation());
+	};
+
+	wormholes = {
+		location: new Wormhole(getLocation()),
+		page: new Wormhole({ list: [] }),
+		counter: new Wormhole(0),
 	};
 
 	shouldComponentUpdate() {
@@ -160,13 +183,15 @@ class Root extends Component {
 
 	render() {
 		return (
-			<Box title="Root">
-				<navi>
-					<Link href="/">Counter</Link>
-					<Link href="/pages">Pages</Link>
-				</navi>
-				<Router />
-			</Box>
+			<Provider wormholes={this.wormholes}>
+				<Box title="Root">
+					<navi>
+						<Link href="/">Counter</Link>
+						<Link href="/pages">Pages</Link>
+					</navi>
+					<Router />
+				</Box>
+			</Provider>
 		);
 	}
 }

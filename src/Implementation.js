@@ -7,13 +7,29 @@ import Emitter from 'emit-lite';
 
 // TODO: should shim `Object.is()`
 
+const isFunction = (t) => typeof t === 'function';
+const isNotFunction = (t) => !isFunction(t);
+const isObject = (t) => typeof t === 'object';
+
+const map = (object, iterator) => Object.keys(object).map(iterator);
+
+const ensure = (validator, errorMessage) => (val) => {
+	if (!validator(val)) {
+		throw new Error(errorMessage);
+	}
+	return val;
+};
+
+const ensureValue = ensure(isNotFunction, 'Value should NOT be a function.');
+const ensureObject = ensure(isObject, 'Value should be an object.');
+
 export class Wormhole extends Emitter {
 	static connect = connect;
 
 	constructor(initialValue) {
 		super();
 
-		this._val = initialValue;
+		this._val = ensureValue(initialValue);
 	}
 
 	get() {
@@ -23,7 +39,7 @@ export class Wormhole extends Emitter {
 
 	set(value) {
 		const prevValue = this._val;
-		this._val = value;
+		this._val = ensureValue(value);
 		this.emit('set', value, prevValue);
 		if (!Object.is(prevValue, value)) {
 			this.emit('change', value, prevValue);
@@ -37,8 +53,9 @@ export class Wormhole extends Emitter {
 
 	hoc(name, options) {
 		return connect({
-			...options,
+			getInitial: () => ({ [name]: this }),
 			mapProps: () => ({ [name]: this }),
+			...options,
 		});
 	}
 }
@@ -60,7 +77,6 @@ class ContextTyper {
 }
 
 export function ensureWormholeValue(val) {
-	// const isValid = typeof val === 'function' || val instanceof Wormhole;
 	const isValid = val instanceof Wormhole;
 	return isValid ? val : new Wormhole(val);
 }
@@ -68,8 +84,10 @@ export function ensureWormholeValue(val) {
 export function connect(options) {
 	return function hoc(WrappedComponent) {
 		const {
+			getInitial,
 			select = (v) => v,
 			mapProps = () => ({}),
+			mapMethods = () => ({}),
 			contextType = 'wormholes',
 			isPure = true,
 		} = options || {};
@@ -91,45 +109,51 @@ export function connect(options) {
 				const { props, context } = this;
 				this._unsubscribes = [];
 
-				const wormholes = contextTyper.toValue(context);
+				const wormholesFromCtx = contextTyper.toValue(context);
+				const wormholes = isFunction(getInitial) ?
+					getInitial(wormholesFromCtx, context, props) : wormholesFromCtx
+				;
 
-				const compute = (getComputed, deps = []) => {
+				const compute = (getComputedValue) => {
 					let computed;
+					const deps = map(wormholes, (key) => wormholes[key]);
 					const unsubs = [];
 					const subscribe = (wormhole) => {
 						unsubs.push(wormhole.on('get', () => {
 							this._unsubscribes.push(wormhole.on('change', () => {
-								computed.set(getComputed());
+								computed.set(getComputedValue());
 							}));
 						}));
 					};
 
 					if (deps.length) { deps.forEach(subscribe); }
 
-					const computedValue = getComputed();
+					const computedValue = getComputedValue();
 					unsubs.forEach((unsub) => unsub());
 					return computed = new Wormhole(computedValue);
 				};
 
+				const methods = ensureObject(mapMethods.call(wormholes, wormholes));
+				const wormholeProps = ensureObject(mapProps.call(wormholes, wormholes));
 
-				const wormholeProps = mapProps(wormholes, compute);
+				this.state = map(wormholeProps, (key) => {
+					const value = wormholeProps[key];
+					if (isFunction(value)) { wormholeProps[key] = compute(value); }
+					return key;
+				})
+				.reduce((state, key) => {
+					const wormhole = ensureWormholeValue(wormholeProps[key]);
+					const value = select.call(wormhole, wormhole.get(), props);
+					state[key] = value;
 
-				this.state = Object
-					.keys(wormholeProps)
-					.reduce((state, key) => {
-						const wormhole = ensureWormholeValue(wormholeProps[key]);
-						const value = select.call(wormhole, wormhole.get(), props);
-						state[key] = value;
+					this._unsubscribes.push(wormhole.on('change', (nextValue) => {
+						this.setState({
+							[key]: select.call(wormhole, nextValue, this.props),
+						});
+					}));
 
-						this._unsubscribes.push(wormhole.on('change', (nextValue) => {
-							this.setState({
-								[key]: select.call(wormhole, nextValue, this.props),
-							});
-						}));
-
-						return state;
-					}, {})
-				;
+					return state;
+				}, methods);
 			}
 
 			componentWillUnmount() {

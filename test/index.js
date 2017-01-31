@@ -90,14 +90,12 @@ describe('react wormhole hoc', () => {
 		assert(isUpdated);
 	});
 
-	it('`select()` option', () => {
+	it('hoc with `mapProps()` options', () => {
 		const value = 'hello';
 		const wormhole = new Wormhole({ value, bla: 'bla' });
 		const App = ({ a }) => (<div>{a}</div>);
 		const hoc = wormhole.hoc('a', {
-			select(data) {
-				return data.value;
-			},
+			mapProps: ({ a }) => ({ a: a.get().value }),
 		});
 		const WrappeedApp = hoc(App);
 		const wrapper = mount(<WrappeedApp />);
@@ -144,9 +142,7 @@ describe('react wormhole hoc', () => {
 		const value = 'hello';
 		const App = ({ a }) => (<div>{a}</div>);
 		const hoc = connect({
-			mapProps(store) {
-				return { a: store.a };
-			},
+			mapProps: ({ a }) => ({ a }),
 			contextType: 'store',
 		});
 		const WrappeedApp = hoc(App);
@@ -173,17 +169,39 @@ describe('react wormhole hoc', () => {
 		assert.equal(wrapper.find('div').text(), value);
 	});
 
-	it('<Provider /> advanced', () => {
+	it('<Provider />', () => {
+		const value = 'hello';
+		const App = ({ a }) => (<div>{a}</div>);
 		const hoc = connect({
-			mapProps(wormholes, compute) {
+			mapProps: ({ a }) => ({ a }),
+		});
+		const WrappeedApp = hoc(App);
+
+		const wrapper = mount(
+			<Provider
+				wormholes={{
+					a: value,
+				}}
+			>
+				<WrappeedApp />
+			</Provider>
+		);
+		assert.equal(wrapper.find('div').text(), value);
+	});
+
+	it('`mapMethods()` and `computed` props', () => {
+		const hoc = connect({
+			mapProps(wormholes) {
+				const { count } = wormholes;
 				return {
-					count: wormholes.count,
-					doubleCount: compute(
-						() => wormholes.count.get() * 2,
-						[wormholes.count],
-					),
+					count,
+					doubleCount: () => count.get() * 2,
+				};
+			},
+			mapMethods(wormholes) {
+				const { count } = wormholes;
+				return {
 					increase() {
-						const { count } = wormholes;
 						count.set(count.get() + 1);
 					},
 				};
@@ -213,9 +231,7 @@ describe('react wormhole hoc', () => {
 
 		const wrapper = mount(
 			<Provider
-				wormholes={{
-					count: 1,
-				}}
+				wormholes={{ count: 1 }}
 			>
 				<WrappeedApp />
 			</Provider>
