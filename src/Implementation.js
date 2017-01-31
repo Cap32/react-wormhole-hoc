@@ -5,16 +5,14 @@ import hoistStatics from 'hoist-non-react-statics';
 import shallowCompare from 'react-addons-shallow-compare';
 import dotProp from 'dot-prop';
 import Emitter from 'emit-lite';
-
-// TODO: should shim `Object.is()`
+import is from 'core-js/library/fn/object/is';
 
 const isFunction = (t) => typeof t === 'function';
 const isNotFunction = (t) => !isFunction(t);
 const isObject = (t) => typeof t === 'object';
 
-const map = (object, iterator) => Object.keys(object).map(iterator);
-const forEach = (object, iterator) =>
-	Object.keys(object).forEach((key) => iterator(object[key], key))
+const map = (object, iterator) =>
+	Object.keys(object).map((key) => iterator(object[key], key))
 ;
 
 const ensure = (validator, errorMessage) => (val) => {
@@ -46,7 +44,7 @@ export class Wormhole extends Emitter {
 		const prevValue = this._val;
 		this._val = ensureValue(value);
 		this.emit('set', value, prevValue);
-		if (!Object.is(prevValue, value)) {
+		if (!is(prevValue, value)) {
 			this.emit('change', value, prevValue);
 		}
 	}
@@ -131,24 +129,24 @@ export function connect(options) {
 				const methods = ensureObject(mapMethods.call(wormholes, wormholes));
 				const props = ensureObject(mapProps.call(wormholes, wormholes));
 
-				forEach(props, (wormhole, prop) => {
+				map(props, (wormhole, prop) => {
 					setUpState(prop, ensureWormholeValue(wormhole));
 				});
 
-				forEach(methods, (method, prop) => state[prop] = method);
+				map(methods, (method, prop) => state[prop] = method);
 
-				forEach(computed, (getComputed, prop) => {
+				map(computed, (getComputed, prop) => {
 					var wormhole;
 					const getComputedValue = ensureFunction(getComputed);
 					const get = () => getComputedValue.call(wormholes, wormholes);
-					const deps = map(wormholes, (key) => wormholes[key]);
+					const deps = map(wormholes, (wormhole) => wormhole);
 					const unsubs = [];
 					const watchDep = (depWormhole) => {
 						unsubs.push(depWormhole.on('get', (path) => {
 							this._unsubscribes.push(depWormhole.on('change', (val, prev) => {
 								const nextValue = dotProp.get(val, path);
 								const prevValue = dotProp.get(prev, path);
-								if (!Object.is(nextValue, prevValue)) {
+								if (!is(nextValue, prevValue)) {
 									wormhole.set(get());
 								}
 							}));

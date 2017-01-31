@@ -27,19 +27,21 @@ module.exports = (webpackEnv = {}) => {
 			rules: [
 				{
 					test: /\.js$/,
-					include: [srcDir, exampleDir],
-					loader: 'babel',
-					options: {
-						presets: [
-							['es2015', { modules: false }],
-							'react',
-							'stage-0',
-						],
-						plugins: [
-							'transform-decorators-legacy',
-						],
-						cacheDirectory: true,
-						babelrc: false,
+					include: DEV ? [srcDir, exampleDir] : undefined,
+					use: {
+						loader: 'babel-loader',
+						options: {
+							presets: [
+								['es2015', { modules: false }],
+								'react',
+								'stage-0',
+							],
+							plugins: [
+								'transform-decorators-legacy',
+							],
+							cacheDirectory: true,
+							babelrc: false,
+						},
 					},
 				},
 			],

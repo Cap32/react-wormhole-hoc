@@ -198,7 +198,7 @@ describe('react wormhole hoc', () => {
 		assert.equal(wrapper.find('div').text(), value);
 	});
 
-	it('`mapMethods()` and `computed` props', () => {
+	it('`mapMethods()`, `mapMethods()` and `computed` options', () => {
 		const hoc = connect({
 			mapProps: ({ count }) => ({ count }),
 			computed: {
@@ -252,68 +252,77 @@ describe('react wormhole hoc', () => {
 		assert.equal(wrapper.find('#doubleCount').text(), 4);
 	});
 
-	// it('advanced `computed` props', () => {
-	// 	const hoc = connect({
-	// 		mapProps(wormholes) {
-	// 			const { count1, count2 } = wormholes;
-	// 			return {
-	// 				count2,
-	// 				count2,
-	// 				doubleCount: () => count.get('it.is.awesome') * 2,
-	// 			};
-	// 		},
-	// 		mapMethods(wormholes) {
-	// 			const { count } = wormholes;
-	// 			return {
-	// 				increase() {
-	// 					count.set(count.get() + 1);
-	// 				},
-	// 			};
-	// 		},
-	// 	});
+	it('advanced `computed` props', () => {
+		const hoc = connect({
+			mapProps(wormholes) {
+				const { count2 } = wormholes;
+				return {
+					count2,
+				};
+			},
+			computed: {
+				count1() {
+					return this.count1.get('it.is.awesome');
+				},
+				doubleCount() {
+					return this.count1.get('it.is.awesome') * 2;
+				},
+			},
+			mapMethods(wormholes) {
+				const { count1, count2 } = wormholes;
+				return {
+					increase() {
+						count1.set(count1.get('it.is.awesome') + 1);
+						count2.set(count2.get() + 1);
+					},
+				};
+			},
+		});
 
-	// 	class App extends Component {
-	// 		static propTypes = {
-	// 			count: PropTypes.number,
-	// 			doubleCount: PropTypes.number,
-	// 			increase: PropTypes.func,
-	// 		};
+		class App extends Component {
+			static propTypes = {
+				count1: PropTypes.number,
+				count2: PropTypes.number,
+				doubleCount: PropTypes.number,
+				increase: PropTypes.func,
+			};
 
-	// 		render() {
-	// 			const { count, doubleCount, increase } = this.props;
-	// 			return (
-	// 				<div>
-	// 					<button onClick={increase}>increase</button>
-	// 					<p id="count">{count}</p>
-	// 					<p id="doubleCount">{doubleCount}</p>
-	// 				</div>
-	// 			);
-	// 		}
-	// 	}
+			render() {
+				const { count1, count2, doubleCount, increase } = this.props;
+				return (
+					<div>
+						<button onClick={increase}>increase</button>
+						<p id="count1">{count1}</p>
+						<p id="count2">{count2}</p>
+						<p id="doubleCount">{doubleCount}</p>
+					</div>
+				);
+			}
+		}
 
-	// 	const WrappeedApp = hoc(App);
+		const WrappeedApp = hoc(App);
 
-	// 	const wrapper = mount(
-	// 		<Provider
-	// 			wormholes={{
-	// 				count1: new Wormhole({
-	// 					it: {
-	// 						is: {
-	// 							awesome: 0,
-	// 						},
-	// 					},
-	// 				}),
-	// 				count2: new Wormhole(0),
-	// 			}}
-	// 		>
-	// 			<WrappeedApp />
-	// 		</Provider>
-	// 	);
+		const wrapper = mount(
+			<Provider
+				wormholes={{
+					count1: new Wormhole({
+						it: {
+							is: {
+								awesome: 1,
+							},
+						},
+					}),
+					count2: new Wormhole(1),
+				}}
+			>
+				<WrappeedApp />
+			</Provider>
+		);
 
-	// 	assert.equal(wrapper.find('#count').text(), 1);
-	// 	assert.equal(wrapper.find('#doubleCount').text(), 2);
-	// 	wrapper.find('button').simulate('click');
-	// 	assert.equal(wrapper.find('#count').text(), 2);
-	// 	assert.equal(wrapper.find('#doubleCount').text(), 4);
-	// });
+		assert.equal(wrapper.find('#count1').text(), 1);
+		assert.equal(wrapper.find('#doubleCount').text(), 2);
+		wrapper.find('button').simulate('click');
+		assert.equal(wrapper.find('#count1').text(), 2);
+		assert.equal(wrapper.find('#doubleCount').text(), 4);
+	});
 });
