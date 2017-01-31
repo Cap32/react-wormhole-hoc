@@ -14,13 +14,11 @@ const makeFetchData = (page) => () => {
 };
 
 @connect({
-	mapProps({ page, location }) {
-		return {
-			data: () => {
-				const id = /\/(\d+)$/.exec(location.get())[1];
-				return page.get().list.find((page) => page.id === +id);
-			},
-		};
+	computed: {
+		data() {
+			const id = /\/(\d+)$/.exec(this.location.get())[1];
+			return this.page.get().list.find((page) => page.id === +id);
+		},
 	},
 	mapMethods({ page }) {
 		return {

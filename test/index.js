@@ -90,7 +90,7 @@ describe('react wormhole hoc', () => {
 		assert(isUpdated);
 	});
 
-	it('hoc with `mapProps()` options', () => {
+	it('hoc with options', () => {
 		const value = 'hello';
 		const wormhole = new Wormhole({
 			it: {
@@ -102,9 +102,9 @@ describe('react wormhole hoc', () => {
 		});
 		const App = ({ a }) => (<div>{a}</div>);
 		const hoc = wormhole.hoc('a', {
-			mapProps: ({ a }) => ({
-				a: () => a.get('it.is.awesome'),
-			}),
+			computed: {
+				a: ({ a }) => a.get('it.is.awesome'),
+			},
 		});
 		const WrappeedApp = hoc(App);
 		const wrapper = mount(<WrappeedApp />);
@@ -200,12 +200,11 @@ describe('react wormhole hoc', () => {
 
 	it('`mapMethods()` and `computed` props', () => {
 		const hoc = connect({
-			mapProps(wormholes) {
-				const { count } = wormholes;
-				return {
-					count,
-					doubleCount: () => count.get() * 2,
-				};
+			mapProps: ({ count }) => ({ count }),
+			computed: {
+				doubleCount() {
+					return this.count.get() * 2;
+				},
 			},
 			mapMethods(wormholes) {
 				const { count } = wormholes;
