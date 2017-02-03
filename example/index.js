@@ -5,9 +5,10 @@ import { render } from 'react-dom';
 import Wormhole, { connect, Provider } from '../src';
 import { Box, Link, getLocation, fetch } from './utils';
 
-const makeFetchData = (page) => () => {
+const fetchData = function () {
+	const { page } = this;
 	if (!page.get().list.length) {
-		fetch('/fake/api').then((data) => {
+		return fetch('/fake/api').then((data) => {
 			page.set(data);
 		});
 	}
@@ -20,11 +21,7 @@ const makeFetchData = (page) => () => {
 			return this.page.get().list.find((page) => page.id === +id);
 		},
 	},
-	mapMethods({ page }) {
-		return {
-			fetchData: makeFetchData(page),
-		};
-	},
+	methods: { fetchData },
 })
 class Page extends Component {
 	static propTypes = {
@@ -50,11 +47,7 @@ class Page extends Component {
 
 @connect({
 	mapProps: ({ page }) => ({ page }),
-	mapMethods({ page }) {
-		return {
-			fetchData: makeFetchData(page),
-		};
-	},
+	methods: { fetchData },
 })
 class Pages extends Component {
 	static propTypes = {
@@ -83,12 +76,13 @@ class Pages extends Component {
 
 @connect({
 	mapProps: ({ counter }) => ({ counter }),
-	mapMethods: ({ counter }) => ({
+	methods: {
 		increase(ev) {
+			const { counter } = this;
 			ev.preventDefault();
 			counter.set(counter.get() + 1);
 		},
-	})
+	},
 })
 class CounterControl extends Component {
 	static propTypes = {

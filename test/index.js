@@ -198,7 +198,7 @@ describe('react wormhole hoc', () => {
 		assert.equal(wrapper.find('div').text(), value);
 	});
 
-	it('`mapMethods()`, `mapMethods()` and `computed` options', () => {
+	it('`methods` and `computed` options', () => {
 		const hoc = connect({
 			mapProps: ({ count }) => ({ count }),
 			computed: {
@@ -206,13 +206,11 @@ describe('react wormhole hoc', () => {
 					return this.count.get() * 2;
 				},
 			},
-			mapMethods(wormholes) {
-				const { count } = wormholes;
-				return {
-					increase() {
-						count.set(count.get() + 1);
-					},
-				};
+			methods: {
+				increase() {
+					const { count } = this;
+					count.set(count.get() + 1);
+				},
 			},
 		});
 
@@ -268,14 +266,12 @@ describe('react wormhole hoc', () => {
 					return this.count1.get('it.is.awesome') * 2;
 				},
 			},
-			mapMethods(wormholes) {
-				const { count1, count2 } = wormholes;
-				return {
-					increase() {
-						count1.set(count1.get('it.is.awesome') + 1);
-						count2.set(count2.get() + 1);
-					},
-				};
+			methods: {
+				increase() {
+					const { count1, count2 } = this;
+					count1.set(count1.get('it.is.awesome') + 1);
+					count2.set(count2.get() + 1);
+				},
 			},
 		});
 

@@ -79,12 +79,49 @@ export function ensureWormholeValue(val) {
 	return isValid ? val : new Wormhole(val);
 }
 
+class Galaxy {
+	constructor(component) {
+		this.$component = component;
+		Object.defineProperties(this, {
+			$props: {
+				get() {
+					return component.props;
+				},
+			},
+			$state: {
+				get() {
+					return component.state;
+				},
+			},
+			$context: {
+				get() {
+					return component.context;
+				},
+			},
+			$refs: {
+				get() {
+					return component.refs;
+				},
+			},
+		});
+	}
+
+	__assign(props) {
+		assign(this, props);
+		return this;
+	}
+
+	__invoke(method) {
+		return method.call(this, this);
+	}
+}
+
 export function connect(options) {
 	return function hoc(WrappedComponent) {
 		const {
 			getInitial,
 			mapProps = () => ({}),
-			mapMethods = () => ({}),
+			methods = {},
 			computed = {},
 			contextType = 'wormholes',
 			isPure = true,
@@ -105,8 +142,10 @@ export function connect(options) {
 
 			componentWillMount() {
 				const { context } = this;
-				const vm = {};
+				const galaxy = new Galaxy(this);
 				const state = {};
+
+				this.methods = {};
 				this._unsubscribes = [];
 
 				const setUpState = (prop, wormhole) => {
@@ -122,24 +161,24 @@ export function connect(options) {
 					getInitial(wormholesFromCtx, this) : wormholesFromCtx
 				;
 
-				assign(vm, wormholes);
+				galaxy.__assign(wormholes);
 
-				const methods = ensureObject(mapMethods.call(vm, vm));
+				galaxy.__assign(ensureObject(methods));
 
-				assign(vm, methods);
+				const props = ensureObject(galaxy.__invoke(mapProps));
 
-				const props = ensureObject(mapProps.call(vm, vm));
+				map(props, (wormhole, prop) =>
+					setUpState(prop, ensureWormholeValue(wormhole))
+				);
 
-				map(props, (wormhole, prop) => {
-					setUpState(prop, ensureWormholeValue(wormhole));
-				});
-
-				map(methods, (method, prop) => state[prop] = method);
+				map(methods, (method, prop) =>
+					this.methods[prop] = method.bind(galaxy)
+				);
 
 				map(computed, (getComputed, prop) => {
 					var wormhole;
 					const getComputedValue = ensureFunction(getComputed);
-					const get = () => getComputedValue.call(vm, vm);
+					const get = () => galaxy.__invoke(getComputedValue);
 					const deps = map(wormholes, (wormhole) => wormhole);
 					const unsubs = [];
 					const watchDep = (depWormhole) => {
@@ -177,12 +216,14 @@ export function connect(options) {
 				const {
 					props,
 					state,
+					methods,
 				} = this;
 
 				return (
 					<WrappedComponent
 						{...props}
 						{...state}
+						{...methods}
 					/>
 				);
 			}
