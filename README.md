@@ -92,9 +92,7 @@ For more usage, please check the `./example` directory, or clone this repo and r
 - static [compose](#static-composehocmakers-component)
 - static [fromContext](#static-fromcontextcontexttypes-gethocmakers-component)
 
-### Wormhole
-
-#### constructor(initialValue)
+## constructor(initialValue)
 
 Create wormhole instance.
 
@@ -106,60 +104,72 @@ Create wormhole instance.
 
 (Wormhole): `wormhole` instance.
 
----
+## get([keyPath])
 
-#### get()
+Get current value. Will emit an `get` event.
 
-Get current value.
+###### Arguments
+
+1. keyPath (String): Return the value of the key path.
 
 ###### Return
 
 (Any): Value.
 
----
+## set(newValue)
 
-#### set(newValue)
-
-Set new value.
+Set new value. Will emit an `set` event. If the `newValue` is different with the old value, it will also emit an `change` event.
 
 ###### Arguments
 
 1. newValue (Any)
 
----
+## on(event, handler)
 
-#### subscribe(handler)
-
-Subscribe value change event.
+Listen for a custom event on the current instance.
 
 ###### Arguments
 
-1. handler (Function): Change event handler.
+1. event (String): Event type.
+2. handler (Function): Event handler.
 
 ###### Return
 
-(Function): Unsubscribe.
+(Function): off.
 
----
+## once(event, handler)
 
-#### hoc(injectPropOrOptions[, Component])
+Listen for a custom event, but only once.
+
+###### Arguments
+
+1. event (String): Event type.
+2. handler (Function): Event handler.
+
+###### Return
+
+(Function): off.
+
+## off([event, handler])
+
+Remove event listener(s).
+
+###### Arguments
+
+1. event (String): Event type.
+2. handler (Function): Event handler.
+
+## hoc(propName)
 
 Create React HOC.
 
 ###### Arguments
 
-1. injectPropOrOptions (String|Object): Options object. Also can be a string short for `Options.injectProp`.
-2. Component (ReactComponent): Target React Component to HOC.
-
-###### Available options:
-
-- injectProp (String): The prop name of the injected value. It's required.
-- initialValue (Any): Set up initial value before the target component mount.
-- select (Function): Select the wormhole value. Must return a new value. (See the example below for detail.)
+1. propName (String): Inject this value as `prop`.
 
 ###### Return
 
-(Function|ReactComponent): If provide a `Component` as the second argument, it will return a new React Component. Otherwise, it will return currify function.
+(Function): A HOC creator function.
 
 ###### Example
 
@@ -183,7 +193,8 @@ class App extends Component {
 	}
 }
 
-export default myWormhole.hoc('myValue', App);
+const hoc = myWormhole.hoc('myValue');
+export default hoc(App);
 ```
 
 With [transform-decorators-legacy](https://github.com/loganfsmyth/babel-plugin-transform-decorators-legacy) babel plugin:
@@ -195,138 +206,85 @@ export default class App extends Component {
 }
 ```
 
-With `select` option:
+## static `<Provider wormholes />`
+
+Makes the `wormholes` available to the connect() calls in the component hierarchy below.
+
+###### Props
+
+- wormholes (Object): A key/value object of `wormholes`.
+- children (ReactElement): The root of your component hierarchy.
+
+###### Example
+
+Basic usage:
 
 ```js
-const myWormhole = new Wormhole({
-	content: 'awesome!!1',
-	something: 'big',
-});
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Wormhole, { Provider } from 'react-wormhole-hoc';
 
-@myWormhole.hoc({
-	injectProp: 'myValue',
-	select(value, props) {
-		return value.content;
-	}
+const wormholes = {
+	page: {},
+	isFetching: false,
+	errorMessage: '',
+};
+
+ReactDOM.render(
+	<Provider wormholes={wormholes} />,
+	rootEl,
+);
+```
+
+## static connect(options)
+
+Connect some wormholes to a HOC.
+
+###### Arguments
+
+1. options (Object): See below for detail.
+
+###### Available options:
+
+- mapWormholes (Function): A function that map `wormholes` to `this` context. By default, it will use all the `wormholes` that provide by `<Provider>`.
+
+- mapProps (Function): A function that map `wormhole` values to props.
+
+
+```js
+@Wormhole.connect({
+	mapWormholes() {
+		return {
+			hello: new Wormhole('hello'),
+			world: new Wormhole('world'),
+		};
+	},
+	mapProps(wormholes) {
+		return {
+			hello: wormholes.hello,
+			world: wormholes.world,
+		};
+	},
 })
 export default class App extends Component {
-	// the same with above...
-}
-```
-
----
-
-#### static compose(hocMakers[, Component])
-
-Compose multiple wormholes to a HOC.
-
-###### Arguments
-
-1. hocMakers (Array): An array of `hocMaker`. A `hocMaker` is the return value of `wormhole.hoc(options)`. (See the example below for detail.)
-2. Component (ReactComponent): Target React Component to HOC.
-
-###### Return
-
-(Function|ReactComponent): If provide a `Component` as the second argument, it will return a new React Component. Otherwise, it will return currify function.
-
-###### Example
-
-Basic usage:
-
-```js
-import React, { Component, PropTypes } from 'react';
-import Wormhole from 'react-wormhole-hoc';
-
-const itWormhole = new Wormhole('it');
-const isWormhole = new Wormhole('is');
-const awesomeWormhole = new Wormhole({ content: 'awesome' });
-
-@Wormhole.compose([
-	itWormhole.hoc('a'),
-	isWormhole.hoc('b'),
-	awesomeWormhole.hoc({
-		injectProp: 'c',
-		select({ content }) { return content; }
-	}),
-])
-export default class App extends Component {
 	static propTypes = {
-		a: PropTypes.string,
-		b: PropTypes.string,
-		c: PropTypes.string,
+		hello: PropTypes.string,
+		world: PropTypes.string,
 	};
 
 	render() {
-		const { a, b, c } = this.props;
+		const { hello, world } = this.props;
 		return (
-			<h1>{a} {b} {c}</h1>
+			<h1>{hello} {world}</h1>
 		);
 	}
 }
 ```
 
----
-
-#### static fromContext(contextTypes, getHocMakers[, Component])
-
-Compose wormholes from `context`. You could define some wormhole instances to `childContextTypes` in parent component, and then get and compose some wormhole instances in child component through `fromContext`. It's useful when using server-side rendering, because the wormhole instances are no longer singletons.
-
-###### Arguments
-
-1. contextTypes (Object): Just the same with `static contextTypes` in React Component.
-2. getHocMakers (Function): Return an array of `hocMaker` through `context`. (See the example below for detail.)
-3. Component (ReactComponent): Target React Component to HOC.
 
 ###### Return
 
-(Function|ReactComponent): If provide a `Component` as the second argument, it will return a new React Component. Otherwise, it will return currify function.
-
-###### Example
-
-Basic usage:
-
-```js
-import React, { Component, PropTypes } from 'react';
-import Wormhole from 'react-wormhole-hoc';
-
-@Wormhole.fromContext(
-	{ store: PropTypes.object }, // the same with `static contextType`
-	(context) => context.store.myData.hoc('a'),
-)
-class App extends Component {
-	static propTypes = {
-		a: PropTypes.string,
-	};
-
-	render() {
-		const { a } = this.props;
-		return (
-			<h1>{this.props.a}</h1>
-		);
-	}
-}
-
-class Container extends Component {
-	static childContextTypes = {
-		store: PropTypes.object,
-	};
-
-	getChildContext() {
-		return {
-			store: {
-
-				// Define a wormhole
-				myData: new Wormhole('awesome'),
-
-			},
-		};
-	}
-
-	render() {
-		return (<App />);
-	}
-}
-```
+(Function): A HOC creator function.
 
 
 ## Installing

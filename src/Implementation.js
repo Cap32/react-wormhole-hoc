@@ -88,26 +88,10 @@ class Galaxy {
 	constructor(component) {
 		this.$component = component;
 		Object.defineProperties(this, {
-			$props: {
-				get() {
-					return component.props;
-				},
-			},
-			$state: {
-				get() {
-					return component.state;
-				},
-			},
-			$context: {
-				get() {
-					return component.context;
-				},
-			},
-			$refs: {
-				get() {
-					return component.refs;
-				},
-			},
+			$props: { get: () => component.props, },
+			$state: { get: () => component.state, },
+			$context: { get: () => component.context, },
+			$refs: { get: () => component.refs, },
 		});
 	}
 
