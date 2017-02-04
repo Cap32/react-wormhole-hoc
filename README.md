@@ -343,6 +343,16 @@ Using yarn:
 yarn add react-wormhole-hoc
 ```
 
+
+## Dependencies
+
+`react-wormhole-hoc` has very few dependencies and most are managed by NPM automatically.
+However the following peer dependencies must be specified by your project in order to avoid version conflicts:
+[`react`](https://www.npmjs.com/package/react),
+[`react-addons-shallow-compare`](https://www.npmjs.com/package/react-addons-shallow-compare), and
+NPM will not automatically install these for you but it will show you a warning message with instructions on how to install them.
+
+
 ## Note
 
 If you want some communications base on paren-child coupling, please use react [context](https://facebook.github.io/react/docs/context.html) instead.

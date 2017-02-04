@@ -2464,6 +2464,12 @@ ignore@^3.1.2:
   version "3.2.0"
   resolved "http://registry.npm.taobao.org/ignore/download/ignore-3.2.0.tgz#8d88f03c3002a0ac52114db25d2c673b0bf1e435"
 
+immutability-helper@^2.1.1:
+  version "2.1.1"
+  resolved "http://registry.npm.taobao.org/immutability-helper/download/immutability-helper-2.1.1.tgz#d80e7577fae14cddde99d8946666d79973e7ba13"
+  dependencies:
+    invariant "^2.2.0"
+
 imurmurhash@^0.1.4:
   version "0.1.4"
   resolved "http://registry.npm.taobao.org/imurmurhash/download/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
@@ -3638,9 +3644,9 @@ rc@~1.1.6:
     minimist "^1.2.0"
     strip-json-comments "~1.0.4"
 
-react-addons-shallow-compare@^15.0.0:
-  version "15.4.1"
-  resolved "http://registry.npm.taobao.org/react-addons-shallow-compare/download/react-addons-shallow-compare-15.4.1.tgz#b68103dd4d13144cb221065f6021de1822bd435a"
+react-addons-shallow-compare@15.3.2:
+  version "15.3.2"
+  resolved "http://registry.npm.taobao.org/react-addons-shallow-compare/download/react-addons-shallow-compare-15.3.2.tgz#c9edba49b9eab44d0c59024d289beb1ab97318b5"
 
 react-addons-test-utils@15.3.2:
   version "15.3.2"

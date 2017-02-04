@@ -269,7 +269,16 @@ describe('react wormhole hoc', () => {
 			methods: {
 				increase() {
 					const { count1, count2 } = this;
-					count1.set(count1.get('it.is.awesome') + 1);
+					const newValue = count1.get('it.is.awesome') + 1;
+					count1.update({
+						it: {
+							is: {
+								awesome: {
+									$set: newValue,
+								},
+							},
+						},
+					});
 					count2.set(count2.get() + 1);
 				},
 			},

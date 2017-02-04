@@ -3,6 +3,7 @@
 import React, { Component, PropTypes } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
 import shallowCompare from 'react-addons-shallow-compare';
+import update from 'immutability-helper';
 import dotProp from 'dot-prop';
 import Emitter from 'emit-lite';
 import is from 'core-js/library/fn/object/is';
@@ -49,9 +50,13 @@ export class Wormhole extends Emitter {
 		}
 	}
 
+	update(updateSpec) {
+		this.set(update(this._val, updateSpec));
+	}
+
 	hoc(name, options) {
 		return connect({
-			getInitial: () => ({ [name]: this }),
+			mapWormholes: () => ({ [name]: this }),
 			mapProps: () => ({ [name]: this }),
 			...options,
 		});
@@ -119,7 +124,7 @@ class Galaxy {
 export function connect(options) {
 	return function hoc(WrappedComponent) {
 		const {
-			getInitial,
+			mapWormholes,
 			mapProps = () => ({}),
 			methods = {},
 			computed = {},
@@ -157,8 +162,8 @@ export function connect(options) {
 				};
 
 				const wormholesFromCtx = contextTyper.toValue(context);
-				const wormholes = isFunction(getInitial) ?
-					getInitial(wormholesFromCtx, this) : wormholesFromCtx
+				const wormholes = isFunction(mapWormholes) ?
+					mapWormholes(wormholesFromCtx, this) : wormholesFromCtx
 				;
 
 				galaxy.__assign(wormholes);

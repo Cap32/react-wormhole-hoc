@@ -24,14 +24,15 @@
   "author": "Cap32",
   "license": "MIT",
   "peerDependencies": {
-    "react": "^0.14.0 || ^15.0.0"
+    "react": "^0.14.0 || ^15.0.0",
+    "react-addons-shallow-compare": "^0.14.0 || ^15.0.0"
   },
   "dependencies": {
     "core-js": "^2.4.1",
     "dot-prop": "^4.1.0",
     "emit-lite": "^2.0.0",
     "hoist-non-react-statics": "^1.2.0",
-    "react-addons-shallow-compare": "^15.0.0"
+    "immutability-helper": "^2.1.1"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
@@ -56,6 +57,7 @@
     "mkdirp": "^0.5.1",
     "mocha": "^3.2.0",
     "react": "^15.3.2",
+    "react-addons-shallow-compare": "15.3.2",
     "react-addons-test-utils": "15.3.2",
     "react-dom": "^15.3.2",
     "rimraf": "^2.5.4",
