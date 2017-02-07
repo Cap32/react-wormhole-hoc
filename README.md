@@ -223,6 +223,7 @@ Basic usage:
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Wormhole, { Provider } from 'react-wormhole-hoc';
+import MyRootComponent from './MyRootComponent';
 
 const wormholes = {
 	page: {},
@@ -231,7 +232,9 @@ const wormholes = {
 };
 
 ReactDOM.render(
-	<Provider wormholes={wormholes} />,
+	<Provider wormholes={wormholes}>
+		<MyRootComponent />
+	</Provider>,
 	rootEl,
 );
 ```
@@ -246,27 +249,24 @@ Connect some wormholes to a HOC.
 
 ###### Available options:
 
-- mapWormholes (Function): A function that map `wormholes` to `this` context. By default, it will use all the `wormholes` that provide by `<Provider>`.
+- mapWormholes (Function): A function to map `wormholes` to `this` context. By default, it will use all the `wormholes` that provided by `<Provider>`.
 
-- mapProps (Function): A function that map `wormhole` values to props.
+- mapProps (Function): A function to map `wormhole` values to props.
 
 
 ```js
 @Wormhole.connect({
-	mapWormholes() {
+	mapProps() {
 		return {
-			hello: new Wormhole('hello'),
-			world: new Wormhole('world'),
+			hello: this.hello,
+			world: this.world,
 		};
 	},
-	mapProps(wormholes) {
-		return {
-			hello: wormholes.hello,
-			world: wormholes.world,
-		};
-	},
+
+	/* the same with above */
+	// mapProps: ({ hello, world }) => ({ hello, world }),
 })
-export default class App extends Component {
+class App extends Component {
 	static propTypes = {
 		hello: PropTypes.string,
 		world: PropTypes.string,
@@ -279,6 +279,19 @@ export default class App extends Component {
 		);
 	}
 }
+
+
+ReactDOM.render(
+	<Provider
+		wormholes={{
+			helo: 'hello',
+			world: 'world',
+		}}
+	>
+		<App />
+	</Provider>,
+	rootEl,
+);
 ```
 
 
