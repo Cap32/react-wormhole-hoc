@@ -91,8 +91,8 @@ For more usage, please check the `./example` directory, or clone this repo and r
 - [once](#onceevent-handler)
 - [off](#offevent-handler)
 - [hoc](#hocpropname)
-- static [Provider](#static-provider-wormholes)
-- static [connect](#static-static-connectoptions)
+- static [Provider](#static-provider-wormholes-)
+- static [connect](#static-connectoptions)
 
 ## constructor(initialValue)
 
