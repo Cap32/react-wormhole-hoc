@@ -85,12 +85,14 @@ For more usage, please check the `./example` directory, or clone this repo and r
 ## API
 
 - [constructor](#constructorinitialvalue)
-- [get](#get)
+- [get](#getkeypath)
 - [set](#setnewvalue)
-- [subscribe](#subscribehandler)
-- [hoc](#hocinjectproporoptions-component)
-- static [compose](#static-composehocmakers-component)
-- static [fromContext](#static-fromcontextcontexttypes-gethocmakers-component)
+- [on](#onevent-handler)
+- [once](#onceevent-handler)
+- [off](#offevent-handler)
+- [hoc](#hocpropname)
+- static [Provider](#static-provider-wormholes)
+- static [connect](#static-static-connectoptions)
 
 ## constructor(initialValue)
 
