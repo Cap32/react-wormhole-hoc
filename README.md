@@ -85,14 +85,14 @@ For more usage, please check the `./example` directory, or clone this repo and r
 ## API
 
 - [constructor](#constructorinitialvalue)
-- [get](#getkeypath)
+- [get](#get)
 - [set](#setnewvalue)
 - [on](#onevent-handler)
 - [once](#onceevent-handler)
 - [off](#offevent-handler)
 - [hoc](#hocpropname)
-- static [Provider](#static-provider-wormholes-)
 - static [connect](#static-connectoptions)
+- static [Provider](#static-provider-wormholes-)
 
 ## constructor(initialValue)
 
@@ -106,13 +106,9 @@ Create wormhole instance.
 
 (Wormhole): `wormhole` instance.
 
-## get([keyPath])
+## get()
 
 Get current value. Will emit an `get` event.
-
-###### Arguments
-
-1. keyPath (String): Return the value of the key path.
 
 ###### Return
 
@@ -208,9 +204,44 @@ export default class App extends Component {
 }
 ```
 
+## static connect(mapProps[, mapMethods, options])
+
+Connect some wormholes to a HOC.
+
+###### Arguments
+
+1. mapProps (Object|Function): Define `wormhole` values to `props`.
+2. mapMethods (Object|Function): Define methods to `props`.
+3. options (Object): See below for detail.
+
+###### Available options:
+
+- isPure (Boolean): Use `pureComponent` or not. Default value: `true`.
+
+
+```js
+@Wormhole.connect({
+	hello: 'hello',
+	world: 'world',
+})
+class App extends Component {
+	static propTypes = {
+		hello: PropTypes.string,
+		world: PropTypes.string,
+	};
+
+	render() {
+		const { hello, world } = this.props;
+		return (
+			<h1>{hello} {world}</h1>
+		);
+	}
+}
+```
+
 ## static `<Provider wormholes />`
 
-Makes the `wormholes` available to the connect() calls in the component hierarchy below.
+Makes the `wormholes` available to the connect() calls in the component hierarchy below. It's useful when using server-side rendering. See below example for detail.
 
 ###### Props
 
@@ -227,6 +258,24 @@ import ReactDOM from 'react-dom';
 import Wormhole, { Provider } from 'react-wormhole-hoc';
 import MyRootComponent from './MyRootComponent';
 
+@Wormhole.connect((wormholes) => ({ // `wormholes` is provided by `<Provider>`.
+	page: wormholes.page
+}))
+class App extends Component {
+	static propTypes = {
+		page: PropTypes.object,
+	};
+
+	render() {
+		const { page } = this.props;
+		return (
+			<div>{page}</div>
+		);
+	}
+}
+
+const MyRootComponent = () => (<App />);
+
 const wormholes = {
 	page: {},
 	isFetching: false,
@@ -236,61 +285,6 @@ const wormholes = {
 ReactDOM.render(
 	<Provider wormholes={wormholes}>
 		<MyRootComponent />
-	</Provider>,
-	rootEl,
-);
-```
-
-## static connect(options)
-
-Connect some wormholes to a HOC.
-
-###### Arguments
-
-1. options (Object): See below for detail.
-
-###### Available options:
-
-- mapWormholes (Function): A function to map `wormholes` to `this` context. By default, it will use all the `wormholes` that provided by `<Provider>`.
-
-- mapProps (Function): A function to map `wormhole` values to props.
-
-
-```js
-@Wormhole.connect({
-	mapProps() {
-		return {
-			hello: this.hello,
-			world: this.world,
-		};
-	},
-
-	/* the same with above */
-	// mapProps: ({ hello, world }) => ({ hello, world }),
-})
-class App extends Component {
-	static propTypes = {
-		hello: PropTypes.string,
-		world: PropTypes.string,
-	};
-
-	render() {
-		const { hello, world } = this.props;
-		return (
-			<h1>{hello} {world}</h1>
-		);
-	}
-}
-
-
-ReactDOM.render(
-	<Provider
-		wormholes={{
-			helo: 'hello',
-			world: 'world',
-		}}
-	>
-		<App />
 	</Provider>,
 	rootEl,
 );
