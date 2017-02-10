@@ -7,14 +7,12 @@ import update from 'immutability-helper';
 import dotProp from 'dot-prop';
 import Emitter from 'emit-lite';
 import is from 'core-js/library/fn/object/is';
-import assign from 'core-js/library/fn/object/assign';
 
 const isFunction = (t) => typeof t === 'function';
 const isNotFunction = (t) => !isFunction(t);
-const isObject = (t) => typeof t === 'object';
 
-const map = (object, iterator) =>
-	Object.keys(object).map((key) => iterator(object[key], key))
+const forEach = (object, iterator) =>
+	Object.keys(object).forEach((key) => iterator(object[key], key))
 ;
 
 const ensure = (validator, errorMessage) => (val) => {
@@ -25,8 +23,6 @@ const ensure = (validator, errorMessage) => (val) => {
 };
 
 const ensureValue = ensure(isNotFunction, 'Value should NOT be a function.');
-const ensureObject = ensure(isObject, 'Value should be an object.');
-const ensureFunction = ensure(isFunction, 'Value should be a function.');
 
 export class Wormhole extends Emitter {
 	static connect = connect;
@@ -55,11 +51,7 @@ export class Wormhole extends Emitter {
 	}
 
 	hoc(name, options) {
-		return connect({
-			mapWormholes: () => ({ [name]: this }),
-			mapProps: () => ({ [name]: this }),
-			...options,
-		});
+		return connect(() => ({ [name]: this }), null, options);
 	}
 }
 
@@ -84,34 +76,11 @@ export function ensureWormholeValue(val) {
 	return isValid ? val : new Wormhole(val);
 }
 
-class Galaxy {
-	constructor(component) {
-		this.$component = component;
-		Object.defineProperties(this, {
-			$props: { get: () => component.props, },
-			$state: { get: () => component.state, },
-			$context: { get: () => component.context, },
-			$refs: { get: () => component.refs, },
-		});
-	}
+const noop = () => ({});
 
-	__assign(props) {
-		assign(this, props);
-		return this;
-	}
-
-	__invoke(method) {
-		return method.call(this, this);
-	}
-}
-
-export function connect(options) {
+export function connect(mapProps = noop, mapMethods = noop, options) {
 	return function hoc(WrappedComponent) {
 		const {
-			mapWormholes,
-			mapProps = () => ({}),
-			methods = {},
-			computed = {},
 			contextType = 'wormholes',
 			isPure = true,
 		} = options || {};
@@ -131,66 +100,32 @@ export function connect(options) {
 
 			componentWillMount() {
 				const { context } = this;
-				const galaxy = new Galaxy(this);
-				const state = {};
 
-				this.methods = {};
+				const props = {};
+				const methodProps = {};
 				this._unsubscribes = [];
 
-				const setUpState = (prop, wormhole) => {
-					state[prop] = wormhole.get();
+				const wormholesFromCtx = contextTyper.toValue(context);
+				const wormholes = isFunction(mapProps) ?
+					mapProps(wormholesFromCtx, this) : (mapProps || wormholesFromCtx)
+				;
+
+				forEach(wormholes, (value, prop) => {
+					const wormhole = wormholes[prop] = ensureWormholeValue(value);
+					props[prop] = wormhole.get();
 					this._unsubscribes.push(wormhole.on('change', (nextValue) => {
 						this.setState({ [prop]: nextValue });
 					}));
-					return wormhole;
-				};
-
-				const wormholesFromCtx = contextTyper.toValue(context);
-				const wormholes = isFunction(mapWormholes) ?
-					mapWormholes(wormholesFromCtx, this) : wormholesFromCtx
-				;
-
-				galaxy.__assign(wormholes);
-
-				galaxy.__assign(ensureObject(methods));
-
-				const props = ensureObject(galaxy.__invoke(mapProps));
-
-				map(props, (wormhole, prop) =>
-					setUpState(prop, ensureWormholeValue(wormhole))
-				);
-
-				map(methods, (method, prop) =>
-					this.methods[prop] = method.bind(galaxy)
-				);
-
-				map(computed, (getComputed, prop) => {
-					var wormhole;
-					const getComputedValue = ensureFunction(getComputed);
-					const get = () => galaxy.__invoke(getComputedValue);
-					const deps = map(wormholes, (wormhole) => wormhole);
-					const unsubs = [];
-					const watchDep = (depWormhole) => {
-						unsubs.push(depWormhole.on('get', (path) => {
-							this._unsubscribes.push(depWormhole.on('change', (val, prev) => {
-								const nextValue = dotProp.get(val, path);
-								const prevValue = dotProp.get(prev, path);
-								if (!is(nextValue, prevValue)) {
-									wormhole.set(get());
-								}
-							}));
-						}));
-					};
-
-					if (deps.length) { deps.forEach(watchDep); }
-
-					const computedValue = get();
-					unsubs.forEach((unsub) => unsub());
-					wormhole = new Wormhole(computedValue);
-					setUpState(prop, wormhole);
 				});
 
-				this.state = state;
+				const methods =
+					isFunction(mapMethods) ? mapMethods(wormholes) : (mapMethods || {})
+				;
+
+				forEach(methods, (method, prop) => methodProps[prop] = method);
+
+				this.state = props;
+				this.methods = methodProps;
 			}
 
 			componentWillUnmount() {
