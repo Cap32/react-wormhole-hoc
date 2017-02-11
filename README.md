@@ -216,6 +216,7 @@ Connect some wormholes to a HOC.
 ###### Available options:
 
 - isPure (Boolean): Use `pureComponent` or not. Default value: `true`.
+- withRef (Boolean): If true, stores a ref to the wrapped component instance and makes it available via `getWrappedInstance()` method. Default value: `false`.
 
 ###### Example
 

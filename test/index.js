@@ -203,4 +203,36 @@ describe('react wormhole hoc', () => {
 		wrapper.find('button').simulate('click');
 		assert.equal(wrapper.find('#counter').text(), 2);
 	});
+
+	it('`withRef` option', () => {
+		const hoc = connect({}, { withRef: true });
+
+		class App extends Component {
+			test() {
+				return true;
+			}
+
+			render() {
+				return (
+					<div />
+				);
+			}
+		}
+
+		const WrappeedApp = hoc(App);
+
+		class Root extends Component {
+			componentDidMount() {
+				assert(this.refs.app.getWrappedInstance().test());
+			}
+
+			render() {
+				return (
+					<WrappeedApp ref="app" />
+				);
+			}
+		}
+
+		mount(<Root />);
+	});
 });

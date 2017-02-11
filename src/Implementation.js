@@ -6,6 +6,8 @@ import shallowCompare from 'react-addons-shallow-compare';
 import Emitter from 'emit-lite';
 import is from 'core-js/library/fn/object/is';
 
+const REF = 'ref';
+
 const isFunction = (t) => typeof t === 'function';
 const isNotFunction = (t) => !isFunction(t);
 
@@ -77,6 +79,7 @@ export function connect(mapProps = noop, options) {
 		const {
 			contextType = 'wormholes',
 			isPure = true,
+			withRef = false,
 		} = options || {};
 
 		const contextTyper = new ContextTyper(contextType);
@@ -84,6 +87,8 @@ export function connect(mapProps = noop, options) {
 		const displayName =
 			WrappedComponent.displayName || WrappedComponent.name || 'Component'
 		;
+
+		const refs = withRef ? { ref: REF } : {};
 
 		class ConnectWormhole extends Component {
 			static displayName = `ConnectWormhole(${displayName})`;
@@ -136,6 +141,16 @@ export function connect(mapProps = noop, options) {
 				return !isPure || shallowCompare(this, ...args);
 			}
 
+			getWrappedInstance() {
+				if (!withRef) {
+					console.warn(
+						'Could not invoke `getWrappedInstance` without `withRef` options'
+					);
+					return null;
+				}
+				return this.refs[REF];
+			}
+
 			render() {
 				const {
 					props,
@@ -148,6 +163,7 @@ export function connect(mapProps = noop, options) {
 						{...props}
 						{...state}
 						{...methods}
+						{...refs}
 					/>
 				);
 			}
