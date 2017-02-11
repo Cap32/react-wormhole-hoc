@@ -21,6 +21,14 @@
     "url": "git@github.com:Cap32/react-wormhole-hoc.git",
     "type": "git"
   },
+  "keywords": [
+    "react",
+    "wormhole",
+    "context",
+    "provider",
+    "inject",
+    "connect"
+  ],
   "author": "Cap32",
   "license": "MIT",
   "peerDependencies": {
