@@ -218,10 +218,17 @@ Connect some wormholes to a HOC.
 
 - isPure (Boolean): Use `pureComponent` or not. Default value: `true`.
 
+###### Example
+
+Basic usage:
 
 ```js
 @Wormhole.connect({
 	hello: 'hello',
+
+	/* the same with above */
+	// hello: new Wormhole('hello'),
+
 	world: 'world',
 })
 class App extends Component {
@@ -239,6 +246,39 @@ class App extends Component {
 }
 ```
 
+With `mapMethods`:
+
+```js
+@Wormhole.connect({
+	counter: 1,
+}, function (wormholes) {
+	const { counter } = wormholes;
+	return {
+		increase(ev) {
+			ev.preventDefault();
+			counter.set(counter.get() + 1);
+		},
+	};
+}))
+class App extends Component {
+	static propTypes = {
+		counter: PropTypes.number,
+		increase: PropTypes.func,
+	};
+
+	render() {
+		const { counter, increase } = this.props;
+		return (
+			<div>
+				<p>{counter}</p>
+				<button onClick={increase} />
+			</div>
+		);
+	}
+}
+```
+
+
 ## static `<Provider wormholes />`
 
 Makes the `wormholes` available to the connect() calls in the component hierarchy below. It's useful when using server-side rendering. See below example for detail.
@@ -249,8 +289,6 @@ Makes the `wormholes` available to the connect() calls in the component hierarch
 - children (ReactElement): The root of your component hierarchy.
 
 ###### Example
-
-Basic usage:
 
 ```js
 import React from 'react';
