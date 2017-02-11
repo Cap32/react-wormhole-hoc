@@ -121,9 +121,7 @@ describe('react wormhole hoc', () => {
 	it('read from `contextType`', () => {
 		const value = 'hello';
 		const App = ({ a }) => (<div>{a}</div>);
-		const hoc = connect(({ a }) => ({ a }), null, {
-			contextType: 'store',
-		});
+		const hoc = connect(({ a }) => ({ a }), { contextType: 'store' });
 		const WrappeedApp = hoc(App);
 
 		class Container extends Component {
@@ -167,27 +165,25 @@ describe('react wormhole hoc', () => {
 	});
 
 	it('connect with `methods`', () => {
-		const hoc = connect(
-			({ count }) => ({ count }),
-			({ count }) => ({
-				increase() {
-					count.set(count.get() + 1);
-				},
-			}),
-		);
+		const hoc = connect(({ counter }) => ({
+			counter,
+			increase() {
+				this.counter.set(this.counter.get() + 1);
+			},
+		}));
 
 		class App extends Component {
 			static propTypes = {
-				count: PropTypes.number,
+				counter: PropTypes.number,
 				increase: PropTypes.func,
 			};
 
 			render() {
-				const { count, increase } = this.props;
+				const { counter, increase } = this.props;
 				return (
 					<div>
 						<button onClick={increase}>increase</button>
-						<p id="count">{count}</p>
+						<p id="counter">{counter}</p>
 					</div>
 				);
 			}
@@ -197,14 +193,14 @@ describe('react wormhole hoc', () => {
 
 		const wrapper = mount(
 			<Provider
-				wormholes={{ count: 1 }}
+				wormholes={{ counter: 1 }}
 			>
 				<WrappeedApp />
 			</Provider>
 		);
 
-		assert.equal(wrapper.find('#count').text(), 1);
+		assert.equal(wrapper.find('#counter').text(), 1);
 		wrapper.find('button').simulate('click');
-		assert.equal(wrapper.find('#count').text(), 2);
+		assert.equal(wrapper.find('#counter').text(), 2);
 	});
 });

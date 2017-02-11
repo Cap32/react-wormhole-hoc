@@ -210,9 +210,8 @@ Connect some wormholes to a HOC.
 
 ###### Arguments
 
-1. mapProps (Object|Function): Define `wormhole` values to `props`.
-2. mapMethods (Object|Function): Define methods to `props`.
-3. options (Object): See below for detail.
+1. mapProps (Object|Function): Define a key-value object to `props`. A `value` should be a `wormhole` instance or a function. If a `value` is a type of `String`, `Number`, `Boolean`, `Array` or a plain Object, it would be converted to `wormhole` instance.
+2. options (Object): See below for detail.
 
 ###### Available options:
 
@@ -226,7 +225,7 @@ Basic usage:
 @Wormhole.connect({
 	hello: 'hello',
 
-	/* the same with above */
+	/* or: */
 	// hello: new Wormhole('hello'),
 
 	world: 'world',
@@ -246,20 +245,16 @@ class App extends Component {
 }
 ```
 
-With `mapMethods`:
+With `methods`:
 
 ```js
 @Wormhole.connect({
 	counter: 1,
-}, function (wormholes) {
-	const { counter } = wormholes;
-	return {
-		increase(ev) {
-			ev.preventDefault();
-			counter.set(counter.get() + 1);
-		},
-	};
-}))
+	increase(ev) {
+		ev.preventDefault();
+		this.counter.set(this.counter.get() + 1);
+	},
+})
 class App extends Component {
 	static propTypes = {
 		counter: PropTypes.number,
@@ -356,11 +351,6 @@ However the following peer dependencies must be specified by your project in ord
 [`react`](https://www.npmjs.com/package/react),
 [`react-addons-shallow-compare`](https://www.npmjs.com/package/react-addons-shallow-compare), and
 NPM will not automatically install these for you but it will show you a warning message with instructions on how to install them.
-
-
-## Note
-
-If you want some communications base on paren-child coupling, please use react [context](https://facebook.github.io/react/docs/context.html) instead.
 
 
 ## Related Projects

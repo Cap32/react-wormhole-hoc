@@ -72,7 +72,7 @@ export function ensureWormholeValue(val) {
 
 const noop = () => ({});
 
-export function connect(mapProps = noop, mapMethods = noop, options) {
+export function connect(mapProps = noop, options) {
 	return function hoc(WrappedComponent) {
 		const {
 			contextType = 'wormholes',
@@ -95,31 +95,37 @@ export function connect(mapProps = noop, mapMethods = noop, options) {
 			componentWillMount() {
 				const { context } = this;
 
-				const props = {};
-				const methodProps = {};
-				this._unsubscribes = [];
-
+				const state = {};
+				const methods = {};
+				const tempMethods = {};
 				const wormholesFromCtx = contextTyper.toValue(context);
-				const wormholes = isFunction(mapProps) ?
+				const wormholes = {
+					$self: this,
+					$wormholes: wormholesFromCtx,
+				};
+				const props = isFunction(mapProps) ?
 					mapProps(wormholesFromCtx, this) : (mapProps || wormholesFromCtx)
 				;
 
-				forEach(wormholes, (value, prop) => {
+				this._unsubscribes = [];
+
+				forEach(props, (value, prop) => {
+					if (isFunction(value)) {
+						return tempMethods[prop] = value;
+					}
 					const wormhole = wormholes[prop] = ensureWormholeValue(value);
-					props[prop] = wormhole.get();
+					state[prop] = wormhole.get();
 					this._unsubscribes.push(wormhole.on('change', (nextValue) => {
 						this.setState({ [prop]: nextValue });
 					}));
 				});
 
-				const methods =
-					isFunction(mapMethods) ? mapMethods(wormholes) : (mapMethods || {})
-				;
+				forEach(tempMethods, (method, prop) =>
+					methods[prop] = method.bind(wormholes)
+				);
 
-				forEach(methods, (method, prop) => methodProps[prop] = method);
-
-				this.state = props;
-				this.methods = methodProps;
+				this.state = state;
+				this.methods = methods;
 			}
 
 			componentWillUnmount() {

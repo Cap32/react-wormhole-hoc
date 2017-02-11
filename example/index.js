@@ -1,7 +1,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import { render } from 'react-dom';
-import Wormhole from '../src';
+import Wormhole, { connect } from '../src';
 import { Box, Link, getLocation, fetch } from './utils';
 
 const locationWormhole = new Wormhole(getLocation());
@@ -16,7 +16,7 @@ const fetchData = () => {
 	}
 };
 
-@Wormhole.connect({
+@connect({
 	store: pageStoreWormhole,
 	location: locationWormhole,
 })
