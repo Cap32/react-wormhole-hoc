@@ -3,8 +3,6 @@
 import React, { Component, PropTypes } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
 import shallowCompare from 'react-addons-shallow-compare';
-import update from 'immutability-helper';
-import dotProp from 'dot-prop';
 import Emitter from 'emit-lite';
 import is from 'core-js/library/fn/object/is';
 
@@ -32,9 +30,9 @@ export class Wormhole extends Emitter {
 		this._val = ensureValue(initialValue);
 	}
 
-	get(path) {
-		this.emit('get', path);
-		return dotProp.get(this._val, path);
+	get() {
+		this.emit('get');
+		return this._val;
 	}
 
 	set(value) {
@@ -44,10 +42,6 @@ export class Wormhole extends Emitter {
 		if (!is(prevValue, value)) {
 			this.emit('change', value, prevValue);
 		}
-	}
-
-	update(updateSpec) {
-		this.set(update(this._val, updateSpec));
 	}
 
 	hoc(name, options) {

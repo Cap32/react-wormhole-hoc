@@ -29,10 +29,8 @@
   },
   "dependencies": {
     "core-js": "^2.4.1",
-    "dot-prop": "^4.1.0",
     "emit-lite": "^2.0.0",
-    "hoist-non-react-statics": "^1.2.0",
-    "immutability-helper": "^2.1.1"
+    "hoist-non-react-statics": "^1.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
