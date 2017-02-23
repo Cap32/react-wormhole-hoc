@@ -91,7 +91,7 @@ For more usage, please check the `./example` directory, or clone this repo and r
 - [once](#onceevent-handler)
 - [off](#offevent-handler)
 - [hoc](#hocpropname)
-- static [connect](#static-connectoptions)
+- static [connect](#static-connectmapprops-options)
 - static [Provider](#static-provider-wormholes-)
 
 ## constructor(initialValue)
@@ -204,7 +204,7 @@ export default class App extends Component {
 }
 ```
 
-## static connect(mapProps[, mapMethods, options])
+## static connect(mapProps[, options])
 
 Connect some wormholes to a HOC.
 
