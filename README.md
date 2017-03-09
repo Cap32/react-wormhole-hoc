@@ -217,6 +217,7 @@ Connect some wormholes to a HOC.
 
 - isPure (Boolean): Use `pureComponent` or not. Default value: `true`.
 - withRef (Boolean): If true, stores a ref to the wrapped component instance and makes it available via `getWrappedInstance()` method. Default value: `false`.
+- hoistMethods ([String]): Copies wrapped component instance methods to HOC instance. Make sure set `withRef: true` first. Default value: `[]`.
 
 ###### Example
 
