@@ -38,7 +38,8 @@
   "dependencies": {
     "core-js": "^2.4.1",
     "emit-lite": "^2.0.0",
-    "hoist-non-react-statics": "^1.2.0"
+    "hoist-non-react-statics": "^1.2.0",
+    "hoist-react-instance-methods": "^1.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",

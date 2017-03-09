@@ -2,6 +2,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
+import hoistReactInstanceMethods from 'hoist-react-instance-methods';
 import shallowCompare from 'react-addons-shallow-compare';
 import Emitter from 'emit-lite';
 import is from 'core-js/library/fn/object/is';
@@ -80,6 +81,7 @@ export function connect(mapProps = noop, options) {
 			contextType = 'wormholes',
 			isPure = true,
 			withRef = false,
+			hoistMethods,
 		} = options || {};
 
 		const contextTyper = new ContextTyper(contextType);
@@ -166,6 +168,18 @@ export function connect(mapProps = noop, options) {
 						{...refs}
 					/>
 				);
+			}
+		}
+
+		if (hoistMethods) {
+			if (!withRef) {
+				console.warn(
+					'Could not use `hoistMethods` without setting `withRef` as `true`'
+				);
+			}
+			else {
+				const getElement = (instance) => instance.refs[REF];
+				hoistReactInstanceMethods(ConnectWormhole, getElement, hoistMethods);
 			}
 		}
 

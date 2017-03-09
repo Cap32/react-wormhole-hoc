@@ -235,4 +235,39 @@ describe('react wormhole hoc', () => {
 
 		mount(<Root />);
 	});
+
+	it('`hoistMethods` option', () => {
+		const hoc = connect({}, {
+			withRef: true,
+			hoistMethods: ['test'],
+		});
+
+		class App extends Component {
+			test() {
+				return true;
+			}
+
+			render() {
+				return (
+					<div />
+				);
+			}
+		}
+
+		const WrappeedApp = hoc(App);
+
+		class Root extends Component {
+			componentDidMount() {
+				assert(this.refs.app.test());
+			}
+
+			render() {
+				return (
+					<WrappeedApp ref="app" />
+				);
+			}
+		}
+
+		mount(<Root />);
+	});
 });

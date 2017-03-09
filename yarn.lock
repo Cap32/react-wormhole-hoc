@@ -2369,6 +2369,10 @@ hoist-non-react-statics@^1.2.0:
   version "1.2.0"
   resolved "http://registry.npm.taobao.org/hoist-non-react-statics/download/hoist-non-react-statics-1.2.0.tgz#aa448cf0986d55cc40773b17174b7dd066cb7cfb"
 
+hoist-react-instance-methods@^1.0.0:
+  version "1.0.0"
+  resolved "http://registry.npm.taobao.org/hoist-react-instance-methods/download/hoist-react-instance-methods-1.0.0.tgz#4e561452ef2199efa897e44dfee81f45dd2f960e"
+
 home-or-tmp@^2.0.0:
   version "2.0.0"
   resolved "http://registry.npm.taobao.org/home-or-tmp/download/home-or-tmp-2.0.0.tgz#e36c3f2d2cae7d746a857e38d18d5f32a7882db8"
