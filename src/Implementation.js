@@ -82,6 +82,7 @@ export function connect(mapProps = noop, options) {
 			isPure = true,
 			withRef = false,
 			hoistMethods,
+			getInstance = (instance) => instance.getWrappedInstance(),
 		} = options || {};
 
 		const contextTyper = new ContextTyper(contextType);
@@ -178,8 +179,7 @@ export function connect(mapProps = noop, options) {
 				);
 			}
 			else {
-				const getElement = (instance) => instance.refs[REF];
-				hoistReactInstanceMethods(ConnectWormhole, getElement, hoistMethods);
+				hoistReactInstanceMethods(ConnectWormhole, getInstance, hoistMethods);
 			}
 		}
 
