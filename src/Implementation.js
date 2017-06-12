@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
 import hoistReactInstanceMethods from 'hoist-react-instance-methods';
 import shallowCompare from 'react-addons-shallow-compare';
@@ -82,6 +83,7 @@ export function connect(mapProps = noop, options) {
 			isPure = true,
 			withRef = false,
 			hoistMethods,
+			getInstance = (instance) => instance.getWrappedInstance(),
 		} = options || {};
 
 		const contextTyper = new ContextTyper(contextType);
@@ -178,8 +180,7 @@ export function connect(mapProps = noop, options) {
 				);
 			}
 			else {
-				const getElement = (instance) => instance.refs[REF];
-				hoistReactInstanceMethods(ConnectWormhole, getElement, hoistMethods);
+				hoistReactInstanceMethods(ConnectWormhole, getInstance, hoistMethods);
 			}
 		}
 

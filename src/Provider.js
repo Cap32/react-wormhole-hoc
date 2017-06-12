@@ -1,5 +1,6 @@
 
-import { Component, PropTypes, Children } from 'react';
+import PropTypes from 'prop-types';
+import { Component, Children } from 'react';
 import { ensureWormholeValue } from './Implementation';
 
 export default class WormholeProvider extends Component {

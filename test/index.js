@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import assert from 'assert';
 import Wormhole, { connect, Provider } from '../src';
 import { render, mount } from 'enzyme';
@@ -255,6 +256,47 @@ describe('react wormhole hoc', () => {
 		}
 
 		const WrappeedApp = hoc(App);
+
+		class Root extends Component {
+			componentDidMount() {
+				assert(this.refs.app.test());
+			}
+
+			render() {
+				return (
+					<WrappeedApp ref="app" />
+				);
+			}
+		}
+
+		mount(<Root />);
+	});
+
+	it('`getInstance` option', () => {
+		let WrappeedApp;
+
+		const hoc = connect({}, {
+			withRef: true,
+			hoistMethods: ['test'],
+			getInstance(instance) {
+				assert(instance instanceof WrappeedApp);
+				return instance.getWrappedInstance();
+			},
+		});
+
+		class App extends Component {
+			test() {
+				return true;
+			}
+
+			render() {
+				return (
+					<div />
+				);
+			}
+		}
+
+		WrappeedApp = hoc(App);
 
 		class Root extends Component {
 			componentDidMount() {
