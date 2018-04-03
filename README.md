@@ -4,7 +4,7 @@
 
 A better alternative to react [context](https://facebook.github.io/react/docs/context.html).
 
-THIS REPO WILL NOT BE MANTAINED ANY MORE because of the [Official Context API](https://reactjs.org/blog/2018/03/29/react-v-16-3.html#official-context-api) in React v16.3 is the better one.
+THIS REPO WILL NOT BE MAINTAINED ANY MORE. Because the [Official Context API](https://reactjs.org/blog/2018/03/29/react-v-16-3.html#official-context-api) in React v16.3 is the better one.
 
 ## Motivations
 
