@@ -4,6 +4,7 @@
 
 A better alternative to react [context](https://facebook.github.io/react/docs/context.html).
 
+THIS REPO WILL NOT BE MANTAINED ANY MORE because of the [Official Context API](https://reactjs.org/blog/2018/03/29/react-v-16-3.html#official-context-api) in React v16.3 is the better one.
 
 ## Motivations
 
@@ -11,88 +12,76 @@ Context is a very powerful feature in React, but it may get you into trouble som
 
 See these issues for detail:
 
-- https://medium.com/@mweststrate/how-to-safely-use-react-context-b7e343eff076
-- https://github.com/facebook/react/issues/2517
-
+* https://medium.com/@mweststrate/how-to-safely-use-react-context-b7e343eff076
+* https://github.com/facebook/react/issues/2517
 
 ## Features
 
-- Works well with `shouldComponentUpdate` and `React.PureComponent`
-- No namespace conflict
-- Works well outside React Component
-- Can communicate without parent-child relationship
-
+* Works well with `shouldComponentUpdate` and `React.PureComponent`
+* No namespace conflict
+* Works well outside React Component
+* Can communicate without parent-child relationship
 
 ## Quick Start
 
 ```js
-import React, { Component, PropTypes } from 'react';
-import Wormhole from 'react-wormhole-hoc';
+import React, { Component, PropTypes } from "react";
+import Wormhole from "react-wormhole-hoc";
 
-const storeWormhole = new Wormhole({ content: '...' })
+const storeWormhole = new Wormhole({ content: "..." });
 
-const fetchData = () => new Promise((resolve) =>
-	setTimeout(() => resolve({ content: 'awesome!!1' }), 1000)
-);
+const fetchData = () =>
+  new Promise(resolve =>
+    setTimeout(() => resolve({ content: "awesome!!1" }), 1000)
+  );
 
-@storeWormhole.hoc('myStore')
+@storeWormhole.hoc("myStore")
 class DeepChild extends Component {
-	static propTypes = {
-		myStore: PropTypes.object,
-	};
+  static propTypes = {
+    myStore: PropTypes.object
+  };
 
-	render() {
-		return (
-			<div>
-				content: {this.props.myStore.content}
-			</div>
-		);
-	}
+  render() {
+    return <div>content: {this.props.myStore.content}</div>;
+  }
 }
 
 class NoUpdate extends Component {
-	shouldComponentUpdate() {
+  shouldComponentUpdate() {
+    // no update
+    return false;
+  }
 
-		// no update
-		return false;
-	}
-
-	render() {
-		return (
-			<DeepChild />
-		);
-	}
+  render() {
+    return <DeepChild />;
+  }
 }
 
 class App extends Component {
-	componentDidMount() {
-		fetchData('/fake/api').then((store) => {
-			storeWormhole.set(store);
-		});
-	}
-	render() {
-		return (
-			<NoUpdate />
-		);
-	}
+  componentDidMount() {
+    fetchData("/fake/api").then(store => {
+      storeWormhole.set(store);
+    });
+  }
+  render() {
+    return <NoUpdate />;
+  }
 }
-
 ```
 
 For more usage, please check the `./example` directory, or clone this repo and run `npm run example` to start live demo.
 
-
 ## API
 
-- [constructor](#constructorinitialvalue)
-- [get](#get)
-- [set](#setnewvalue)
-- [on](#onevent-handler)
-- [once](#onceevent-handler)
-- [off](#offevent-handler)
-- [hoc](#hocpropname)
-- static [connect](#static-connectmapprops-options)
-- static [Provider](#static-provider-wormholes-)
+* [constructor](#constructorinitialvalue)
+* [get](#get)
+* [set](#setnewvalue)
+* [on](#onevent-handler)
+* [once](#onceevent-handler)
+* [off](#offevent-handler)
+* [hoc](#hocpropname)
+* static [connect](#static-connectmapprops-options)
+* static [Provider](#static-provider-wormholes-)
 
 ## constructor(initialValue)
 
@@ -100,7 +89,7 @@ Create wormhole instance.
 
 ###### Arguments
 
-1. initialValue (Any): Initial value.
+1.  initialValue (Any): Initial value.
 
 ###### Return
 
@@ -120,7 +109,7 @@ Set new value. Will emit an `set` event. If the `newValue` is different with the
 
 ###### Arguments
 
-1. newValue (Any)
+1.  newValue (Any)
 
 ## on(event, handler)
 
@@ -128,8 +117,8 @@ Listen for a custom event on the current instance.
 
 ###### Arguments
 
-1. event (String): Event type.
-2. handler (Function): Event handler.
+1.  event (String): Event type.
+2.  handler (Function): Event handler.
 
 ###### Return
 
@@ -141,8 +130,8 @@ Listen for a custom event, but only once.
 
 ###### Arguments
 
-1. event (String): Event type.
-2. handler (Function): Event handler.
+1.  event (String): Event type.
+2.  handler (Function): Event handler.
 
 ###### Return
 
@@ -154,8 +143,8 @@ Remove event listener(s).
 
 ###### Arguments
 
-1. event (String): Event type.
-2. handler (Function): Event handler.
+1.  event (String): Event type.
+2.  handler (Function): Event handler.
 
 ## hoc(propName)
 
@@ -163,7 +152,7 @@ Create React HOC.
 
 ###### Arguments
 
-1. propName (String): Inject this value as `prop`.
+1.  propName (String): Inject this value as `prop`.
 
 ###### Return
 
@@ -174,33 +163,31 @@ Create React HOC.
 Basic usage:
 
 ```js
-import React, { Component, PropTypes } from 'react';
-import Wormhole from 'react-wormhole-hoc';
+import React, { Component, PropTypes } from "react";
+import Wormhole from "react-wormhole-hoc";
 
-const myWormhole = new Wormhole('awesome!!1');
+const myWormhole = new Wormhole("awesome!!1");
 
 class App extends Component {
-	static propTypes = {
-		myValue: PropTypes.string,
-	};
+  static propTypes = {
+    myValue: PropTypes.string
+  };
 
-	render() {
-		return (
-			<h1>{this.props.myValue}</h1>
-		);
-	}
+  render() {
+    return <h1>{this.props.myValue}</h1>;
+  }
 }
 
-const hoc = myWormhole.hoc('myValue');
+const hoc = myWormhole.hoc("myValue");
 export default hoc(App);
 ```
 
 With [transform-decorators-legacy](https://github.com/loganfsmyth/babel-plugin-transform-decorators-legacy) babel plugin:
 
 ```js
-@myWormhole.hoc('myValue')
+@myWormhole.hoc("myValue")
 export default class App extends Component {
-	// the same with above...
+  // the same with above...
 }
 ```
 
@@ -210,14 +197,14 @@ Connect some wormholes to a HOC.
 
 ###### Arguments
 
-1. mapProps (Object|Function): Define a key-value object to `props`. A `value` should be a `wormhole` instance or a function. If a `value` is a type of `String`, `Number`, `Boolean`, `Array` or a plain Object, it would be converted to `wormhole` instance.
-2. options (Object): See below for detail.
+1.  mapProps (Object|Function): Define a key-value object to `props`. A `value` should be a `wormhole` instance or a function. If a `value` is a type of `String`, `Number`, `Boolean`, `Array` or a plain Object, it would be converted to `wormhole` instance.
+2.  options (Object): See below for detail.
 
 ###### Available options:
 
-- isPure (Boolean): Use `pureComponent` or not. Default value: `true`.
-- withRef (Boolean): If true, stores a ref to the wrapped component instance and makes it available via `getWrappedInstance()` method. Default value: `false`.
-- hoistMethods ([String]): Copies wrapped component instance methods to HOC instance. Make sure set `withRef: true` first. Default value: `[]`.
+* isPure (Boolean): Use `pureComponent` or not. Default value: `true`.
+* withRef (Boolean): If true, stores a ref to the wrapped component instance and makes it available via `getWrappedInstance()` method. Default value: `false`.
+* hoistMethods ([String]): Copies wrapped component instance methods to HOC instance. Make sure set `withRef: true` first. Default value: `[]`.
 
 ###### Example
 
@@ -225,25 +212,27 @@ Basic usage:
 
 ```js
 @Wormhole.connect({
-	hello: 'hello',
+  hello: "hello",
 
-	/* or: */
-	// hello: new Wormhole('hello'),
+  /* or: */
+  // hello: new Wormhole('hello'),
 
-	world: 'world',
+  world: "world"
 })
 class App extends Component {
-	static propTypes = {
-		hello: PropTypes.string,
-		world: PropTypes.string,
-	};
+  static propTypes = {
+    hello: PropTypes.string,
+    world: PropTypes.string
+  };
 
-	render() {
-		const { hello, world } = this.props;
-		return (
-			<h1>{hello} {world}</h1>
-		);
-	}
+  render() {
+    const { hello, world } = this.props;
+    return (
+      <h1>
+        {hello} {world}
+      </h1>
+    );
+  }
 }
 ```
 
@@ -251,30 +240,29 @@ With `methods`:
 
 ```js
 @Wormhole.connect({
-	counter: 1,
-	increase(ev) {
-		ev.preventDefault();
-		this.counter.set(this.counter.get() + 1);
-	},
+  counter: 1,
+  increase(ev) {
+    ev.preventDefault();
+    this.counter.set(this.counter.get() + 1);
+  }
 })
 class App extends Component {
-	static propTypes = {
-		counter: PropTypes.number,
-		increase: PropTypes.func,
-	};
+  static propTypes = {
+    counter: PropTypes.number,
+    increase: PropTypes.func
+  };
 
-	render() {
-		const { counter, increase } = this.props;
-		return (
-			<div>
-				<p>{counter}</p>
-				<button onClick={increase} />
-			</div>
-		);
-	}
+  render() {
+    const { counter, increase } = this.props;
+    return (
+      <div>
+        <p>{counter}</p>
+        <button onClick={increase} />
+      </div>
+    );
+  }
 }
 ```
-
 
 ## static `<Provider wormholes />`
 
@@ -282,54 +270,51 @@ Makes the `wormholes` available to the connect() calls in the component hierarch
 
 ###### Props
 
-- wormholes (Object): A key/value object of `wormholes`.
-- children (ReactElement): The root of your component hierarchy.
+* wormholes (Object): A key/value object of `wormholes`.
+* children (ReactElement): The root of your component hierarchy.
 
 ###### Example
 
 ```js
-import React from 'react';
-import ReactDOM from 'react-dom';
-import Wormhole, { Provider } from 'react-wormhole-hoc';
-import MyRootComponent from './MyRootComponent';
+import React from "react";
+import ReactDOM from "react-dom";
+import Wormhole, { Provider } from "react-wormhole-hoc";
+import MyRootComponent from "./MyRootComponent";
 
-@Wormhole.connect((wormholes) => ({ // `wormholes` is provided by `<Provider>`.
-	page: wormholes.page
+@Wormhole.connect(wormholes => ({
+  // `wormholes` is provided by `<Provider>`.
+  page: wormholes.page
 }))
 class App extends Component {
-	static propTypes = {
-		page: PropTypes.object,
-	};
+  static propTypes = {
+    page: PropTypes.object
+  };
 
-	render() {
-		const { page } = this.props;
-		return (
-			<div>{page}</div>
-		);
-	}
+  render() {
+    const { page } = this.props;
+    return <div>{page}</div>;
+  }
 }
 
-const MyRootComponent = () => (<App />);
+const MyRootComponent = () => <App />;
 
 const wormholes = {
-	page: {},
-	isFetching: false,
-	errorMessage: '',
+  page: {},
+  isFetching: false,
+  errorMessage: ""
 };
 
 ReactDOM.render(
-	<Provider wormholes={wormholes}>
-		<MyRootComponent />
-	</Provider>,
-	rootEl,
+  <Provider wormholes={wormholes}>
+    <MyRootComponent />
+  </Provider>,
+  rootEl
 );
 ```
-
 
 ###### Return
 
 (Function): A HOC creator function.
-
 
 ## Installing
 
@@ -345,7 +330,6 @@ Using yarn:
 yarn add react-wormhole-hoc
 ```
 
-
 ## Dependencies
 
 `react-wormhole-hoc` has very few dependencies and most are managed by NPM automatically.
@@ -354,12 +338,10 @@ However the following peer dependencies must be specified by your project in ord
 [`react-addons-shallow-compare`](https://www.npmjs.com/package/react-addons-shallow-compare), and
 NPM will not automatically install these for you but it will show you a warning message with instructions on how to install them.
 
-
 ## Related Projects
 
-- https://github.com/ReactTraining/react-broadcast
-- https://github.com/gnoff/react-tunnel
-
+* https://github.com/ReactTraining/react-broadcast
+* https://github.com/gnoff/react-tunnel
 
 ## License
 
